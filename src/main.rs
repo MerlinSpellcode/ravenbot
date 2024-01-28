@@ -8,8 +8,13 @@ use winapi::shared::windef::HWND;
 use std::ptr;
 
 use ravenbot::utils::env::PROCESS_ID;
-use ravenbot::commands::burst_skill_atk;
-use ravenbot::commands::move_first_location;
+use ravenbot::utils::env::MOVE_1;
+use ravenbot::utils::env::MOVE_2;
+use ravenbot::utils::env::MOVE_3;
+use ravenbot::commands::skill_rotation_1;
+use ravenbot::commands::skill_rotation_2;
+use ravenbot::commands::skill_rotation_3;
+use ravenbot::commands::walk_hunt;
 use ravenbot::checkstats::check_hp;
 
 struct WindowInfo {
@@ -57,7 +62,11 @@ fn main() {
     }).expect("Erro ao definir o manipulador de Ctrl-C");
 
     while running.load(Ordering::SeqCst) {
-        burst_skill_atk(window_info.hwnd);
-        move_first_location(window_info.hwnd);
+        walk_hunt(window_info.hwnd, &MOVE_1);
+        skill_rotation_1(window_info.hwnd);
+        walk_hunt(window_info.hwnd, &MOVE_2);
+        skill_rotation_2(window_info.hwnd);
+        walk_hunt(window_info.hwnd, &MOVE_3);
+        skill_rotation_3(window_info.hwnd);
     }
 }
