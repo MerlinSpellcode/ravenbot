@@ -7,20 +7,21 @@ use winapi::shared::minwindef::{LPARAM, BOOL, DWORD};
 use winapi::shared::windef::HWND;
 use std::ptr;
 
-use ravenbot::utils::env::PROCESS_ID;
-use ravenbot::utils::env::MOVE_1;
-use ravenbot::utils::env::MOVE_2;
-use ravenbot::utils::env::MOVE_3;
-use ravenbot::commands::skill_rotation_1;
-use ravenbot::commands::skill_rotation_2;
-use ravenbot::commands::skill_rotation_3;
-use ravenbot::commands::walk_hunt;
-use ravenbot::checkstats::check_hp;
+use ravenbot::utils::env::PATH_WALK;
+use ravenbot::utils::address::get_base_address;
+use ravenbot::commands::combat_instance;
+use ravenbot::commands::path_walker;
+use ravenbot::commands::time_test;
+use ravenbot::checks::is_hp_below_half;
+use ravenbot::checks::get_aether;
+use ravenbot::checks::get_target;
+use ravenbot::checks::get_coord;
 
 struct WindowInfo {
     game_p_id: DWORD,
     hwnd: HWND,
 }
+
 
 extern "system" fn enum_windows_callback(window: HWND, param: LPARAM) -> BOOL {
     let window_info = unsafe { &mut *(param as *mut WindowInfo) };
@@ -38,8 +39,16 @@ extern "system" fn enum_windows_callback(window: HWND, param: LPARAM) -> BOOL {
 
 
 fn main() {
+    
+    let (base_address, process_id) = match get_base_address() {
+        Some(data) => data,
+        None => {
+            eprintln!("Erro ao encontrar o endereço base do módulo");
+            return;
+        }
+    };
     let mut window_info = WindowInfo {
-        game_p_id: PROCESS_ID,
+        game_p_id: process_id,
         hwnd: ptr::null_mut(),
     };
 
@@ -52,8 +61,6 @@ fn main() {
         return;
     }
 
-    check_hp();
-
     let running = Arc::new(AtomicBool::new(true));
     let r = running.clone();
 
@@ -62,11 +69,17 @@ fn main() {
     }).expect("Erro ao definir o manipulador de Ctrl-C");
 
     while running.load(Ordering::SeqCst) {
-        walk_hunt(window_info.hwnd, &MOVE_1);
-        skill_rotation_1(window_info.hwnd);
-        walk_hunt(window_info.hwnd, &MOVE_2);
-        skill_rotation_2(window_info.hwnd);
-        walk_hunt(window_info.hwnd, &MOVE_3);
-        skill_rotation_3(window_info.hwnd);
+        // let current_value = get_coord();
+        // println!("COORDENADAS: {:?}", current_value);
+        // break;
+        // time_test();
+
+        loop {
+            for path in PATH_WALK.iter() {
+                combat_instance(window_info.hwnd);
+                println!("Para onde está indo: {:?}", path);
+                path_walker(window_info.hwnd, *path);
+            }
+        }
     }
 }

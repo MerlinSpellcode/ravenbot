@@ -7,27 +7,27 @@ use crate::utils::env::{VK_W, VK_A, VK_S, VK_D, VK_TAB};
 pub fn press_w(hwnd: HWND) {
     unsafe { PostMessageA(hwnd, WM_KEYDOWN, VK_W as usize, 0); }
     unsafe { PostMessageA(hwnd, WM_KEYUP, VK_W as usize, 0); }
-    thread::sleep(Duration::from_millis(400));
+    thread::sleep(Duration::from_millis(1));
 }
 pub fn press_a(hwnd: HWND) {
     unsafe { PostMessageA(hwnd, WM_KEYDOWN, VK_A as usize, 0); }
     unsafe { PostMessageA(hwnd, WM_KEYUP, VK_A as usize, 0); }
-    thread::sleep(Duration::from_millis(400));
+    thread::sleep(Duration::from_millis(1));
 }
 pub fn press_s(hwnd: HWND) {
     unsafe { PostMessageA(hwnd, WM_KEYDOWN, VK_S as usize, 0); }
     unsafe { PostMessageA(hwnd, WM_KEYUP, VK_S as usize, 0); }
-    thread::sleep(Duration::from_millis(400));
+    thread::sleep(Duration::from_millis(1));
 }
 pub fn press_d(hwnd: HWND) {
     unsafe { PostMessageA(hwnd, WM_KEYDOWN, VK_D as usize, 0); }
     unsafe { PostMessageA(hwnd, WM_KEYUP, VK_D as usize, 0); }
-    thread::sleep(Duration::from_millis(400));
+    thread::sleep(Duration::from_millis(1));
 }
 pub fn press_tab(hwnd: HWND) {
     unsafe { PostMessageA(hwnd, WM_KEYDOWN, VK_TAB as usize, 0); }
     unsafe { PostMessageA(hwnd, WM_KEYUP, VK_TAB as usize, 0); }
-    thread::sleep(Duration::from_millis(400));
+    thread::sleep(Duration::from_millis(10));
 }
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
@@ -38,5 +38,5 @@ pub fn press_tab(hwnd: HWND) {
 pub fn press_skill(hwnd: HWND, skill: u8) {
     unsafe { PostMessageA(hwnd, WM_KEYDOWN, skill as usize, 0); }
     unsafe { PostMessageA(hwnd, WM_KEYUP, skill as usize, 0); }
-    thread::sleep(Duration::from_millis(600));
+    thread::sleep(Duration::from_millis(10));
 }
