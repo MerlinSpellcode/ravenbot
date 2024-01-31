@@ -1,7 +1,8 @@
 use winapi::shared::windef::HWND;
 use crate::utils::inputs::{press_w, press_a, press_s, press_d, press_skill, press_tab};
-use crate::utils::env::{CDR_Q, VK_F5, VK_F6, VK_Q, CDR_E, VK_E, CDR_1, VK_1, CDR_2, VK_2, CDR_3, VK_3};
+use crate::utils::env::{VK_F5, VK_F6, VK_Q, VK_E, VK_1, VK_2, VK_3, VK_F9, VK_R, VK_Z, VK_C, VK_4, CDR_COMBO_1, CDR_COMBO_2};
 use crate::checks::{get_aether, is_hp_below_half, get_target, get_coord};
+
 use std::collections::HashMap;
 use std::time::{Instant, Duration};
 use std::{thread};
@@ -28,33 +29,63 @@ fn can_call_function(function_id: &str, cooldown: u64) -> bool {
 
 fn main_skill_atk(hwnd: HWND) {
     press_skill(hwnd, VK_F5);
-    thread::sleep(Duration::from_millis(910));
+    thread::sleep(Duration::from_millis(1550));
 }
 
-fn sb_burst_skill_atk(hwnd: HWND) {
-    if !can_call_function("sb_burst_skill_atk", CDR_Q) {
+fn combo_aether_full(hwnd: HWND, hotkey1: u8, hotkey2: u8, cooldown: u64) {
+    if !can_call_function("combo_aether_full", cooldown) {
         return;
     }
     println!("# S1 #");
-    update_last_called("sb_burst_skill_atk");
+    update_last_called("combo_aether_full");
     if check_target(hwnd) {
         loop {
             let aether_value = get_aether();
             check_target(hwnd);
-            println!("# S2 #");
-            if aether_value > 50.0 {
-                println!("# S3 #");
-                press_skill(hwnd, VK_F6);
-                thread::sleep(Duration::from_secs(2));
-                press_skill(hwnd, VK_Q);
+            if aether_value > 99.0 {
+                press_skill(hwnd, hotkey1);
+                std::thread::sleep(std::time::Duration::from_millis(1550));
+                press_skill(hwnd, hotkey2);
+                std::thread::sleep(std::time::Duration::from_millis(1550));
                 break;
             } else {
                 if check_target(hwnd) {
-                    println!("# B5 #");
                     main_skill_atk(hwnd);
-                    thread::sleep(Duration::from_secs(1));
+                    std::thread::sleep(std::time::Duration::from_millis(1550));
                 } else {
-                    println!("# B6 #");
+                    break;
+                }
+            }
+        }
+    } else {
+        return;
+    }
+    
+}
+
+fn combo(hwnd: HWND, hotkey1: u8, hotkey2: u8, cooldown: u64) {
+    if !can_call_function("combo", cooldown) {
+        return;
+    }
+    println!("# S1 #");
+    update_last_called("combo");
+    if check_target(hwnd) {
+        loop {
+            let aether_value = get_aether();
+            check_target(hwnd);
+            if aether_value > 50.0 {
+                press_skill(hwnd, VK_R);
+                std::thread::sleep(std::time::Duration::from_millis(550));
+                press_skill(hwnd, hotkey1);
+                std::thread::sleep(std::time::Duration::from_millis(1550));
+                press_skill(hwnd, hotkey2);
+                std::thread::sleep(std::time::Duration::from_millis(1550));
+                break;
+            } else {
+                if check_target(hwnd) {
+                    main_skill_atk(hwnd);
+                    std::thread::sleep(std::time::Duration::from_millis(1550));
+                } else {
                     break;
                 }
             }
@@ -69,59 +100,38 @@ pub fn hp_passive_restore(hwnd: HWND) {
     while is_hp_below_half() {
         combat_instance(hwnd);
         std::thread::sleep(std::time::Duration::from_secs(1));
+        if check_target(hwnd) {
+            break;
+        }
     }
     println!("HP acima de 50%");
+    return;
 }
 
-pub fn burst_skill_atk(hwnd: HWND, hotkey: u8, cooldown: u64) {
-    let skill_cdr_name = format!("{}_skill_atk", hotkey);
-    if !can_call_function(&skill_cdr_name, cooldown) {
-        return;
-    }
-    println!("# B1 #");
-    update_last_called(&skill_cdr_name);
+pub fn skill_atk(hwnd: HWND, hotkey: u8) {
     if check_target(hwnd) {
-        println!("# B2 #");
         loop {
             let aether_value = get_aether();
             check_target(hwnd);
-            println!("# B3 #");
             if aether_value > 50.0 {
-                println!("# B4 #");
                 press_skill(hwnd, hotkey);
-                thread::sleep(Duration::from_secs(1));
+                std::thread::sleep(std::time::Duration::from_millis(1550));
                 break;
             } else {
                 if check_target(hwnd) {
-                    println!("# B5 #");
                     main_skill_atk(hwnd);
-                    thread::sleep(Duration::from_secs(1));
+                    std::thread::sleep(std::time::Duration::from_millis(1550));
                 } else {
-                    println!("# B6 #");
                     break;
                 }
             }
         }
     } else {
-        println!("# B7 #");
         return;
     }
     
 }
 
-
-pub fn walk_to(hwnd: HWND, commands: &[&str]) {
-    for &command in commands {
-        match command {
-            "w" => press_w(hwnd),
-            "a" => press_a(hwnd),
-            "s" => press_s(hwnd),
-            "d" => press_d(hwnd),
-            _ => println!("Unknown command: {}", command),
-        }
-    }
-    println!("# WALK TEST #");
-}
 
 pub fn path_walker(hwnd: HWND, destination: [i32; 3]) {
     let mut attempts = 0;
@@ -192,17 +202,19 @@ fn check_target(hwnd: HWND) -> bool {
 
 
 pub fn combat_instance(hwnd: HWND) {
-    press_tab(hwnd);
     let mut counter = 0;
 
     while check_target(hwnd) {
         match counter {
-            0 => sb_burst_skill_atk(hwnd),
-            1 => burst_skill_atk(hwnd, VK_E, CDR_E),
-            2 => burst_skill_atk(hwnd, VK_1, CDR_1),
-            3 => burst_skill_atk(hwnd, VK_2, CDR_2),
-            4 => {
-                burst_skill_atk(hwnd, VK_3, CDR_3);
+            0 => skill_atk(hwnd, VK_1),
+            1 => combo(hwnd, VK_C, VK_F6, CDR_COMBO_2),
+            2 => combo_aether_full(hwnd, VK_F9, VK_Q, CDR_COMBO_1),
+            3 => skill_atk(hwnd, VK_2),
+            4 => skill_atk(hwnd, VK_3),
+            5 => skill_atk(hwnd, VK_4),
+            6 => skill_atk(hwnd, VK_E),
+            7 => {
+                skill_atk(hwnd, VK_Z);
                 counter = -1; // Será incrementado para 0 no final do loop
             }
             _ => (),
@@ -211,6 +223,11 @@ pub fn combat_instance(hwnd: HWND) {
         counter += 1;
         thread::sleep(Duration::from_millis(1));
     }
-    hp_passive_restore(hwnd);
-    println!("# Terminando Combate #");
+    if is_hp_below_half() {
+        while is_hp_below_half() {
+            std::thread::sleep(std::time::Duration::from_secs(10));
+        }
+    }
+    println!("# Saindo do Combat Stance #");
+    return;
 }

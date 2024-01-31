@@ -1,5 +1,9 @@
 extern crate winapi;
+extern crate serde;
+extern crate serde_json;
 
+use serde::{Deserialize};
+use std::fs;
 use winapi::um::winuser::{EnumWindows, GetWindowThreadProcessId, IsWindowVisible};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -7,15 +11,20 @@ use winapi::shared::minwindef::{LPARAM, BOOL, DWORD};
 use winapi::shared::windef::HWND;
 use std::ptr;
 
-use ravenbot::utils::env::PATH_WALK;
 use ravenbot::utils::address::get_base_address;
 use ravenbot::commands::combat_instance;
 use ravenbot::commands::path_walker;
-use ravenbot::commands::time_test;
-use ravenbot::checks::is_hp_below_half;
-use ravenbot::checks::get_aether;
-use ravenbot::checks::get_target;
-use ravenbot::checks::get_coord;
+
+#[derive(Deserialize)]
+struct Config {
+    coordinates_file: String,
+}
+
+#[derive(Deserialize)]
+struct Coordinates {
+    coordinates: Vec<[i32; 3]>,
+}
+
 
 struct WindowInfo {
     game_p_id: DWORD,
@@ -39,14 +48,30 @@ extern "system" fn enum_windows_callback(window: HWND, param: LPARAM) -> BOOL {
 
 
 fn main() {
-    
-    let (base_address, process_id) = match get_base_address() {
+     // Ler o arquivo config.json
+    let config_contents = fs::read_to_string("config/config.json")
+    .expect("Erro ao ler o arquivo config.json");
+
+    // Deserializar o config.json para obter o caminho do arquivo de coordenadas
+    let config: Config = serde_json::from_str(&config_contents)
+        .expect("Erro ao deserializar config.json");
+
+    // Ler o arquivo de coordenadas
+    let coordinates_contents = fs::read_to_string(&config.coordinates_file)
+        .expect("Erro ao ler o arquivo de coordenadas");
+
+    // Deserializar o arquivo de coordenadas
+    let coordinates: Coordinates = serde_json::from_str(&coordinates_contents)
+        .expect("Erro ao deserializar o arquivo de coordenadas");
+
+    let (_base_address, process_id) = match get_base_address() {
         Some(data) => data,
         None => {
             eprintln!("Erro ao encontrar o endereço base do módulo");
             return;
         }
     };
+
     let mut window_info = WindowInfo {
         game_p_id: process_id,
         hwnd: ptr::null_mut(),
@@ -69,13 +94,8 @@ fn main() {
     }).expect("Erro ao definir o manipulador de Ctrl-C");
 
     while running.load(Ordering::SeqCst) {
-        // let current_value = get_coord();
-        // println!("COORDENADAS: {:?}", current_value);
-        // break;
-        // time_test();
-
         loop {
-            for path in PATH_WALK.iter() {
+            for path in coordinates.coordinates.iter() {
                 combat_instance(window_info.hwnd);
                 println!("Para onde está indo: {:?}", path);
                 path_walker(window_info.hwnd, *path);

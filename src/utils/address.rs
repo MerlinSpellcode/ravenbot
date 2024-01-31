@@ -1,5 +1,5 @@
 use winapi::um::processthreadsapi::OpenProcess;
-use winapi::um::psapi::{EnumProcessModules, GetModuleBaseNameW, GetModuleInformation, MODULEINFO};
+use winapi::um::psapi::{EnumProcessModules, GetModuleInformation, MODULEINFO};
 use winapi::um::winnt::PROCESS_ALL_ACCESS;
 use winapi::shared::minwindef::{DWORD, HMODULE};
 use winapi::um::tlhelp32::{CreateToolhelp32Snapshot, Process32First, Process32Next, PROCESSENTRY32, TH32CS_SNAPPROCESS};
@@ -67,7 +67,7 @@ pub fn get_base_address() -> Option<(usize, DWORD)> {
     }
 
     for i in 0..(cb_needed / mem::size_of::<HMODULE>() as DWORD) {
-        let mut mod_info = unsafe { mem::MaybeUninit::<MODULEINFO>::uninit().assume_init() };
+        let mut mod_info = unsafe { mem::MaybeUninit::<MODULEINFO>::uninit().assume_init_read() };
         if unsafe { GetModuleInformation(process_handle, h_mods[i as usize], &mut mod_info, mem::size_of::<MODULEINFO>() as DWORD) } != 0 {
             return Some((mod_info.lpBaseOfDll as usize, process_id));
         }

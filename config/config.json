@@ -1,0 +1,35 @@
+{
+    "coordinates_file": "config/coordinates/taratugas_coord.json",
+    "combat": [
+        {
+            "type": "full_aether",   
+            "hotkey": ["F9", "Q"],
+            "cdr": 15
+        },
+        {
+            "type": "combo",   
+            "hotkey": ["C", "F6"],
+            "cdr": 20
+        },
+        {
+            "type": "basic",   
+            "hotkey": ["1"]
+        },
+        {
+            "type": "basic",   
+            "hotkey": ["2"]
+        },
+        {
+            "type": "basic",   
+            "hotkey": ["3"]
+        },
+        {
+            "type": "basic",   
+            "hotkey": ["4"]
+        },
+        {
+            "type": "basic",   
+            "hotkey": ["Z"]
+        }
+    ]
+}

@@ -38,5 +38,5 @@ pub fn press_tab(hwnd: HWND) {
 pub fn press_skill(hwnd: HWND, skill: u8) {
     unsafe { PostMessageA(hwnd, WM_KEYDOWN, skill as usize, 0); }
     unsafe { PostMessageA(hwnd, WM_KEYUP, skill as usize, 0); }
-    thread::sleep(Duration::from_millis(10));
+    thread::sleep(Duration::from_millis(1));
 }
