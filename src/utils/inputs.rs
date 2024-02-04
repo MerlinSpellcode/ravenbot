@@ -2,7 +2,7 @@ use winapi::um::winuser::{PostMessageA, WM_KEYDOWN, WM_KEYUP};
 use winapi::shared::windef::HWND;
 use std::thread;
 use std::time::Duration;
-use crate::utils::env::{VK_W, VK_A, VK_S, VK_D, VK_TAB};
+use crate::utils::env::{VK_W, VK_A, VK_S, VK_D, VK_TAB, HOTKEYS};
 
 pub fn press_w(hwnd: HWND) {
     unsafe { PostMessageA(hwnd, WM_KEYDOWN, VK_W as usize, 0); }
@@ -35,8 +35,11 @@ pub fn press_tab(hwnd: HWND) {
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-pub fn press_skill(hwnd: HWND, skill: u8) {
-    unsafe { PostMessageA(hwnd, WM_KEYDOWN, skill as usize, 0); }
-    unsafe { PostMessageA(hwnd, WM_KEYUP, skill as usize, 0); }
-    thread::sleep(Duration::from_millis(1));
+pub fn press_skill(hwnd: HWND, skill: &str) {
+    // println!("### Pressing skill: {}", skill);
+    let hotkey = HOTKEYS.get(skill).expect("Hotkey not found");
+    unsafe { PostMessageA(hwnd, WM_KEYDOWN, *hotkey as usize, 0); }
+    thread::sleep(Duration::from_millis(100));
+    unsafe { PostMessageA(hwnd, WM_KEYUP, *hotkey as usize, 0); }
+    thread::sleep(Duration::from_millis(100));
 }

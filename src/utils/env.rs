@@ -1,6 +1,106 @@
+use lazy_static::lazy_static;
+use std::collections::HashMap;
 use winapi::shared::minwindef::{DWORD};
+use serde::{Serialize, Deserialize};
+
+
+lazy_static! {
+    pub static ref HOTKEYS: HashMap<&'static str, u8> = {
+        let mut m = HashMap::new();
+        m.insert("F1", 0x70);
+        m.insert("F2", 0x71);
+        m.insert("F3", 0x72);
+        m.insert("F4", 0x73);
+        m.insert("F5", 0x74);
+        m.insert("F6", 0x75);
+        m.insert("F7", 0x76);
+        m.insert("F8", 0x77);
+        m.insert("F9", 0x78);
+        m.insert("F10", 0x79);
+        m.insert("F11", 0x7A);
+        m.insert("F12", 0x7B);
+        m.insert("A", 0x41);
+        m.insert("B", 0x42);
+        m.insert("C", 0x43);
+        m.insert("D", 0x44);
+        m.insert("E", 0x45);
+        m.insert("F", 0x46);
+        m.insert("G", 0x47);
+        m.insert("H", 0x48);
+        m.insert("I", 0x49);
+        m.insert("J", 0x4A);
+        m.insert("K", 0x4B);
+        m.insert("L", 0x4C);
+        m.insert("M", 0x4D);
+        m.insert("N", 0x4E);
+        m.insert("O", 0x4F);
+        m.insert("P", 0x50);
+        m.insert("Q", 0x51);
+        m.insert("R", 0x52);
+        m.insert("S", 0x53);
+        m.insert("T", 0x54);
+        m.insert("U", 0x55);
+        m.insert("V", 0x56);
+        m.insert("W", 0x57);
+        m.insert("X", 0x58);
+        m.insert("Y", 0x59);
+        m.insert("Z", 0x5A);
+        m.insert("0", 0x30);
+        m.insert("1", 0x31);
+        m.insert("2", 0x32);
+        m.insert("3", 0x33);
+        m.insert("4", 0x34);
+        m.insert("5", 0x35);
+        m.insert("6", 0x36);
+        m.insert("7", 0x37);
+        m.insert("8", 0x38);
+        m.insert("9", 0x39);
+        m
+    };
+}
+
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Config {
+    pub hunts: Vec<Hunt>,
+    pub combat: Combat, // Adicione esta linha para incluir o campo combat
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Hunt {
+    pub name: String,
+    pub route: Vec<[i32; 3]>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Combat {
+    pub hp_regen_passive: String,
+    pub mana_regen_passive: String,
+    pub hp_to_defense: String,
+    pub basic: Vec<BasicS>,
+    pub damage: Vec<Skill>,
+    pub defense: Vec<Skill>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Skill {
+    pub hotkey: String,
+    pub mana: u32,
+    pub aether: bool,
+    pub cooldown: u64,
+    pub name: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct BasicS {
+    pub hotkey: String,
+    pub mana: u32,
+    pub name: String,
+}
 
 pub const PROCESS_NAME: &str = "ravendawn_dx";
+pub const BOT_OWNER: &str = "Default string";
+
 pub const VK_Q: u8 = 0x51;
 pub const VK_R: u8 = 0x52;
 pub const VK_E: u8 = 0x45;
@@ -17,7 +117,7 @@ pub const VK_C: u8 = 0x43;
 pub const VK_V: u8 = 0x56;
 pub const VK_4: u8 = 0x34;
 pub const VK_F1: u8 = 0x70;
-// pub const VK_F2: u8 = 0x71;
+pub const VK_F2: u8 = 0x71;
 pub const VK_F5: u8 = 0x74;
 pub const VK_F6: u8 = 0x75;
 pub const VK_TAB: u8 = 0x09;
@@ -30,6 +130,8 @@ pub const VK_F10: u8 = 0x79;
 pub const PROCESS_ID: DWORD = 60004;
 pub const HP_CURRENT: [usize; 2] = [0x027C3BA0, 0xCE0];
 pub const HP_MAX: [usize; 2] = [0x027C3BA0, 0xCE8];
+pub const MANA_MAX: [usize; 2] = [0x027C3BA0, 0xDE0];
+pub const MANA_CURRENT: [usize; 2] = [0x027C3BA0, 0xD28];
 pub const AETHER: [usize; 2] = [0x027C3BA0, 0xD60];
 pub const TARGET_CHECK: [usize; 2] = [0x027C3BA0, 0x84C];
 pub const P_X: [usize; 2] = [0x027C3BA0, 0x18];

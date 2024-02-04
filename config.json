@@ -1,0 +1,269 @@
+{
+  "hunts": [
+    {
+      "name": "tartarugas",
+      "route": [
+        [
+          5373,
+          5585,
+          7
+        ],
+        [
+          5366,
+          5593,
+          7
+        ],
+        [
+          5364,
+          5597,
+          7
+        ],
+        [
+          5350,
+          5599,
+          7
+        ],
+        [
+          5345,
+          5598,
+          7
+        ],
+        [
+          5340,
+          5597,
+          7
+        ],
+        [
+          5337,
+          5595,
+          7
+        ],
+        [
+          5331,
+          5595,
+          7
+        ],
+        [
+          5327,
+          5591,
+          7
+        ],
+        [
+          5327,
+          5588,
+          7
+        ],
+        [
+          5327,
+          5584,
+          7
+        ],
+        [
+          5327,
+          5578,
+          7
+        ],
+        [
+          5326,
+          5574,
+          7
+        ],
+        [
+          5330,
+          5567,
+          7
+        ],
+        [
+          5337,
+          5567,
+          7
+        ],
+        [
+          5337,
+          5575,
+          7
+        ],
+        [
+          5341,
+          5578,
+          7
+        ],
+        [
+          5343,
+          5586,
+          7
+        ],
+        [
+          5345,
+          5590,
+          7
+        ],
+        [
+          5346,
+          5593,
+          7
+        ],
+        [
+          5349,
+          5593,
+          7
+        ],
+        [
+          5353,
+          5593,
+          7
+        ],
+        [
+          5360,
+          5593,
+          7
+        ],
+        [
+          5363,
+          5593,
+          7
+        ],
+        [
+          5368,
+          5593,
+          7
+        ],
+        [
+          5369,
+          5591,
+          7
+        ],
+        [
+          5369,
+          5588,
+          7
+        ]
+      ]
+    },
+    {
+      "name": "cidade",
+      "route": [
+        [
+          5515,
+          5616,
+          7
+        ],
+        [
+          5515,
+          5606,
+          7
+        ],
+        [
+          5521,
+          5606,
+          7
+        ],
+        [
+          5521,
+          5613,
+          7
+        ]
+      ]
+    }
+  ],
+  "combat": {
+    "hp_regen_passive": "50%",
+    "mana_regen_passive": "50%",
+    "hp_to_defense": "30%",
+    "basic": [
+      {
+        "hotkey": "F5",
+        "mana": 14,
+        "name": "Smite"
+      }
+    ],
+    "damage": [
+      {
+        "hotkey": "Q",
+        "mana": 72,
+        "aether": false,
+        "cooldown": 15,
+        "name": "Leech"
+      },
+      {
+        "hotkey": "F7",
+        "mana": 101,
+        "aether": true,
+        "cooldown": 45,
+        "name": "Spirit Shield"
+      },
+      {
+        "hotkey": "E",
+        "mana": 29,
+        "aether": false,
+        "cooldown": 10,
+        "name": "Curse"
+      },
+      {
+        "hotkey": "1",
+        "mana": 174,
+        "aether": true,
+        "cooldown": 60,
+        "name": "Death Touch"
+      },
+      {
+        "hotkey": "F6",
+        "mana": 74,
+        "aether": true,
+        "cooldown": 30,
+        "name": "Holy Force"
+      },
+      {
+        "hotkey": "2",
+        "mana": 58,
+        "aether": true,
+        "cooldown": 15,
+        "name": "Arcane Torrent"
+      },
+      {
+        "hotkey": "3",
+        "mana": 101,
+        "aether": true,
+        "cooldown": 30,
+        "name": "Blessed Earth"
+      },
+      {
+        "hotkey": "4",
+        "mana": 43,
+        "aether": true,
+        "cooldown": 20,
+        "name": "Shield Throw"
+      },
+      {
+        "hotkey": "F10",
+        "mana": 29,
+        "aether": true,
+        "cooldown": 45,
+        "name": "Siphon"
+      }
+    ],
+    "defense": [
+      {
+        "hotkey": "F1",
+        "mana": 319,
+        "aether": false,
+        "cooldown": 18,
+        "name": "Air Aura"
+      },
+      {
+        "hotkey": "F2",
+        "mana": 261,
+        "aether": true,
+        "cooldown": 15,
+        "name": "Air Aura"
+      },
+      {
+        "hotkey": "F3",
+        "mana": 0,
+        "aether": false,
+        "cooldown": 45,
+        "name": "HP Potion"
+      }
+    ]
+  }
+}
