@@ -1,5 +1,5 @@
 use winapi::shared::windef::HWND;
-use crate::utils::inputs::{press_w, press_a, press_s, press_d, press_skill, press_tab};
+use crate::utils::inputs::{press_w, press_a, press_s, press_d, press_skill, press_tab, spam_press_skill, spam_unpress_skill};
 use crate::utils::env::{Skill, BasicS};
 use crate::checks::{get_aether, hp_need_restore, mana_need_restore, is_hp_full, is_mana_full, get_target, get_coord};
 
@@ -81,7 +81,7 @@ pub fn path_walker(hwnd: HWND, destination: [i32; 3], hp_regen_passive: &str, ma
         let new_coord = get_coord();
         if new_coord == current {
             // O personagem não se moveu, então tenta outro movimento
-            combat_instance(hwnd, hp_regen_passive, mana_regen_passive, hp_to_defense, combat_basic, combat_damage, combat_defense);
+            loldinis_instance(hwnd, hp_regen_passive, mana_regen_passive);
             attempts += 1;
         } else {
             // Reseta as tentativas se houver movimento
@@ -142,13 +142,8 @@ fn spam_skills(
 }
 
 fn use_skill(hwnd: HWND, hotkey: &str) {
-    if check_target(hwnd) {
-        thread::sleep(Duration::from_millis(1));
-        press_skill(hwnd, hotkey);
-        return;
-    } else {
-        return;
-    }
+    thread::sleep(Duration::from_millis(1));
+    press_skill(hwnd, hotkey);
 }
 
 
@@ -179,6 +174,95 @@ pub fn combat_instance(hwnd: HWND, hp_regen_passive: &str, mana_regen_passive: &
         thread::sleep(Duration::from_millis(1));
     }
 
+    if hp_need_restore(hp_regen_passive) {
+        println!("HP needs restore");
+        while is_hp_full() {
+            std::thread::sleep(std::time::Duration::from_secs(1));
+            if check_target(hwnd) {
+                break;
+            }
+        }
+    }
+    if mana_need_restore(mana_regen_passive) {
+        println!("Mana needs restore");
+        while is_mana_full() {
+            std::thread::sleep(std::time::Duration::from_secs(1));
+            if check_target(hwnd) {
+                break;
+            }
+        }
+    }
+    println!("# Saindo do Combat Stance #");
+    return;
+}
+
+
+fn start_fight(hwnd: HWND) {
+    std::thread::sleep(std::time::Duration::from_millis(2000));
+    press_skill(hwnd, "F9");
+    std::thread::sleep(std::time::Duration::from_millis(1500));
+    press_skill(hwnd, "F10");
+    std::thread::sleep(std::time::Duration::from_millis(1500));
+    if get_aether() < 50.0 {
+        press_skill(hwnd, "F5");
+        std::thread::sleep(std::time::Duration::from_millis(1500));
+    }
+    press_skill(hwnd, "Q");
+    std::thread::sleep(std::time::Duration::from_millis(100));
+    press_skill(hwnd, "R");
+    std::thread::sleep(std::time::Duration::from_millis(1500));
+    press_skill(hwnd, "F5");
+    std::thread::sleep(std::time::Duration::from_millis(1500));
+    press_skill(hwnd, "E");
+    std::thread::sleep(std::time::Duration::from_millis(1500));
+    press_skill(hwnd, "F6");
+    std::thread::sleep(std::time::Duration::from_millis(100));
+    press_skill(hwnd, "F6");
+    std::thread::sleep(std::time::Duration::from_millis(1500));
+}
+pub fn loldinis_instance(hwnd: HWND, hp_regen_passive: &str, mana_regen_passive: &str) {
+    println!("@@ Start Loldinis Instance @@");
+    let skills_to_use = ["E", "1", "2", "3", "4", "F7", "F8"];
+    while check_target(hwnd) {
+        start_fight(hwnd);
+        if get_aether() < 99.0 {
+            spam_press_skill(hwnd, "F5");
+            while get_aether() < 99.0 && check_target(hwnd) {
+                println!("@@ while get aether @@");
+                std::thread::sleep(std::time::Duration::from_millis(100));
+                if get_aether() > 99.0 {
+                    spam_unpress_skill(hwnd, "F5");
+                    break;
+                }
+            }
+            spam_unpress_skill(hwnd, "F5");
+        }
+        
+        for skill in skills_to_use.iter(){
+            if check_target(hwnd){
+                if get_aether() > 49.0 {
+                    if check_target(hwnd) {
+                        press_skill(hwnd, "R");
+                        std::thread::sleep(std::time::Duration::from_millis(1500));
+                        press_skill(hwnd, skill);
+                    } else {
+                        break;
+                    }
+                } else {
+                    spam_press_skill(hwnd, "F5");
+                    while get_aether() < 99.0 && check_target(hwnd) {
+                        println!("@@ while get aether @@");
+                        std::thread::sleep(std::time::Duration::from_millis(100));
+                        if get_aether() > 99.0 {
+                            spam_unpress_skill(hwnd, "F5");
+                            break;
+                        }
+                    }
+                    spam_unpress_skill(hwnd, "F5");
+                }
+            }
+        }
+    }
     if hp_need_restore(hp_regen_passive) {
         println!("HP needs restore");
         while is_hp_full() {

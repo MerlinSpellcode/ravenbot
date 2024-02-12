@@ -99,7 +99,7 @@ pub struct BasicS {
 }
 
 pub const PROCESS_NAME: &str = "ravendawn_dx";
-pub const BOT_OWNER: &str = "Default string";
+pub const BOT_OWNER: &str = "07D7622_MB1E020747";
 
 pub const VK_Q: u8 = 0x51;
 pub const VK_R: u8 = 0x52;
@@ -128,15 +128,15 @@ pub const VK_F10: u8 = 0x79;
 // pub const VK_F11: u8 = 0x7A;
 // pub const VK_F12: u8 = 0x7B;
 pub const PROCESS_ID: DWORD = 60004;
-pub const HP_CURRENT: [usize; 2] = [0x027C3BA0, 0xCE0];
-pub const HP_MAX: [usize; 2] = [0x027C3BA0, 0xCE8];
-pub const MANA_MAX: [usize; 2] = [0x027C3BA0, 0xDE0];
-pub const MANA_CURRENT: [usize; 2] = [0x027C3BA0, 0xD28];
-pub const AETHER: [usize; 2] = [0x027C3BA0, 0xD60];
-pub const TARGET_CHECK: [usize; 2] = [0x027C3BA0, 0x84C];
-pub const P_X: [usize; 2] = [0x027C3BA0, 0x18];
-pub const P_Y: [usize; 2] = [0x027C3BA0, 0x1C];
-pub const P_Z: [usize; 2] = [0x027C3BA0, 0x20];
+pub const HP_CURRENT: [usize; 2] = [0x027C4BA0, 0xCE0];
+pub const HP_MAX: [usize; 2] = [0x027C4BA0, 0xCE8];
+pub const MANA_MAX: [usize; 2] = [0x027C4BA0, 0xDE0];
+pub const MANA_CURRENT: [usize; 2] = [0x027C4BA0, 0xD28];
+pub const AETHER: [usize; 2] = [0x027C4BA0, 0xD60];
+pub const TARGET_CHECK: [usize; 2] = [0x027C4BA0, 0x84C];
+pub const P_X: [usize; 2] = [0x027C4BA0, 0x18];
+pub const P_Y: [usize; 2] = [0x027C4BA0, 0x1C];
+pub const P_Z: [usize; 2] = [0x027C4BA0, 0x20];
 
 // pub const PATH_WALK: [[i32; 3]; 19] = [
 //     [4915, 5529, 5],

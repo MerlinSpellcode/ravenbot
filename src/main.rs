@@ -18,6 +18,7 @@ use ravenbot::utils::address::get_base_address;
 use ravenbot::utils::env::Config;
 use ravenbot::utils::env::Hunt;
 use ravenbot::commands::combat_instance;
+use ravenbot::commands::loldinis_instance;
 use ravenbot::commands::path_walker;
 use ravenbot::checks::get_coord;
 use ravenbot::checks::check_hwid;
@@ -186,7 +187,7 @@ async fn hunting() -> io::Result<()> {
 
     while running.load(Ordering::SeqCst) {
         for path in selected_hunt.route.iter() {
-            combat_instance(window_info.hwnd, hp_regen_passive, mana_regen_passive, hp_to_defense, combat_basic, combat_damage, &combined_skills);
+            loldinis_instance(window_info.hwnd, hp_regen_passive, mana_regen_passive);
             println!("Para onde está indo: {:?}", path);
             path_walker(window_info.hwnd, *path, hp_regen_passive, mana_regen_passive, hp_to_defense, combat_basic, combat_damage, &combined_skills);
         }
