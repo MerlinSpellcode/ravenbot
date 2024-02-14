@@ -24,6 +24,8 @@
         - **cooldown** -> tempo em segundos de cooldown da skill (WIP)
         - **name** -> nome da skill (WIP)
         - **is_area** -> boolean (true ou false), se true, o script vai garantir o duplo clique da hotkey
+        - **prereq** -> hotkey da skill a ser castada como prerequisito para ela
+        - **has_global** -> boolean (true ou false), se false, script vai ignorar o delay do global cd entre o cast dela e a proxima skill
     - **combo** -> Array de configuração de skills para combo (normalmente skills de dano que usam aether)
         - **hotkey** -> hotkey da skills (OBS: apenas letras, números e a família F (F1, F2, etc) foram mapeados)
         - **mana** -> mana gasto com a skill (WIP)
@@ -31,6 +33,8 @@
         - **cooldown** -> tempo em segundos de cooldown da skill (WIP)
         - **name** -> nome da skill (WIP)
         - **is_area** -> boolean (true ou false), se true, o script vai garantir o duplo clique da hotkey
+        - **prereq** -> hotkey da skill a ser castada como prerequisito para ela
+        - **has_global** -> boolean (true ou false), se false, script vai ignorar o delay do global cd entre o cast dela e a proxima skill
     - **defense_light** -> Array de configuração de skills para usar quando "hp_to_defense_light" chegar no limite de hp definido pelo valor variável
         - **hotkey** -> hotkey da skills (OBS: apenas letras, números e a família F (F1, F2, etc) foram mapeados)
         - **mana** -> mana gasto com a skill (WIP)
@@ -38,6 +42,8 @@
         - **cooldown** -> tempo em segundos de cooldown da skill (WIP)
         - **name** -> nome da skill (WIP)
         - **is_area** -> boolean (true ou false), se true, o script vai garantir o duplo clique da hotkey
+        - **prereq** -> hotkey da skill a ser castada como prerequisito para ela
+        - **has_global** -> boolean (true ou false), se false, script vai ignorar o delay do global cd entre o cast dela e a proxima skill
     - **defense_full** -> Array de configuração de skills para usar quando "hp_to_defense_full" chegar no limite de hp definido pelo valor variável
         - **hotkey** -> hotkey da skills (OBS: apenas letras, números e a família F (F1, F2, etc) foram mapeados)
         - **mana** -> mana gasto com a skill (WIP)
@@ -45,4 +51,6 @@
         - **cooldown** -> tempo em segundos de cooldown da skill (WIP)
         - **name** -> nome da skill (WIP)
         - **is_area** -> boolean (true ou false), se true, o script vai garantir o duplo clique da hotkey
+        - **prereq** -> hotkey da skill a ser castada como prerequisito para ela
+        - **has_global** -> boolean (true ou false), se false, script vai ignorar o delay do global cd entre o cast dela e a proxima skill
 

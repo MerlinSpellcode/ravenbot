@@ -193,33 +193,43 @@ fn check_target(hwnd: HWND) -> bool {
 //     return;
 // }
 
+fn sleep_for_global_cd(skill: &Skill, global_cd: u64){
+    if skill.has_global {
+        std::thread::sleep(std::time::Duration::from_millis(global_cd));
+    }
+}
+
 fn start_fight(hwnd: HWND, combat_start: &[Skill], combat_basic: &[BasicS], global_cd: u64) {
     for skill in combat_start.iter(){
         if check_target(hwnd){
+            if skill.prereq != "" {
+                press_skill(hwnd, &skill.prereq);
+                sleep_for_global_cd(skill, global_cd);
+            }
             if skill.aether {
                 if get_aether() > 49.0 {
-                    std::thread::sleep(std::time::Duration::from_millis(global_cd));
                     if skill.is_area {
-                        double_press_skill(hwnd, &skill.hotkey)
+                        double_press_skill(hwnd, &skill.hotkey);
                     } else {
-                        press_skill(hwnd, &skill.hotkey)
+                        press_skill(hwnd, &skill.hotkey);
                     }
+                    sleep_for_global_cd(skill, global_cd);
                 } else {
-                    generate_aether(hwnd, combat_basic);
-                    std::thread::sleep(std::time::Duration::from_millis(global_cd));
+                    generate_aether(hwnd, combat_basic, global_cd);
                     if skill.is_area {
-                        double_press_skill(hwnd, &skill.hotkey)
+                        double_press_skill(hwnd, &skill.hotkey);
                     } else {
-                        press_skill(hwnd, &skill.hotkey)
+                        press_skill(hwnd, &skill.hotkey);
                     }
+                    sleep_for_global_cd(skill, global_cd);
                 }
             } else {
-                std::thread::sleep(std::time::Duration::from_millis(global_cd));
                 if skill.is_area {
-                    double_press_skill(hwnd, &skill.hotkey)
+                    double_press_skill(hwnd, &skill.hotkey);
                 } else {
-                    press_skill(hwnd, &skill.hotkey)
+                    press_skill(hwnd, &skill.hotkey);
                 }
+                sleep_for_global_cd(skill, global_cd);
             }
         } else {
             break;
@@ -227,47 +237,53 @@ fn start_fight(hwnd: HWND, combat_start: &[Skill], combat_basic: &[BasicS], glob
     }
 }
 
-fn generate_aether(hwnd: HWND, combat_basic: &[BasicS]){
-    spam_press_skill(hwnd, &combat_basic[0].hotkey);
+fn generate_aether(hwnd: HWND, combat_basic: &[BasicS], global_cd: u64){
     while get_aether() < 50.0 && check_target(hwnd) {
         println!("@@ while get aether @@");
-        std::thread::sleep(std::time::Duration::from_millis(100));
+        press_skill(hwnd, &combat_basic[0].hotkey);
+        std::thread::sleep(std::time::Duration::from_millis(global_cd));
         if get_aether() > 49.0 {
-            spam_unpress_skill(hwnd, &combat_basic[0].hotkey);
             break;
         }
     }
-    spam_unpress_skill(hwnd, &combat_basic[0].hotkey);
 }
 
 fn defensive_skills(hwnd: HWND, hp_to_defense_light: &str, hp_to_defense_full: &str, combat_defense_light: &[Skill], combat_defense_full: &[Skill], combat_basic: &[BasicS], global_cd: u64){
     if hp_need_restore(hp_to_defense_full){
         for skill in combat_defense_full.iter(){
             if check_target(hwnd){
+                if skill.prereq != "" {
+                    press_skill(hwnd, &skill.prereq);
+                    sleep_for_global_cd(skill, global_cd);
+                }
                 if skill.aether {
                     if get_aether() > 49.0 {
-                        std::thread::sleep(std::time::Duration::from_millis(global_cd));
                         if skill.is_area {
-                            double_press_skill(hwnd, &skill.hotkey)
+                            double_press_skill(hwnd, &skill.hotkey);
+
                         } else {
-                            press_skill(hwnd, &skill.hotkey)
+                            press_skill(hwnd, &skill.hotkey);
+
                         }
+                        sleep_for_global_cd(skill, global_cd);
                     } else {
-                        generate_aether(hwnd, combat_basic);
-                        std::thread::sleep(std::time::Duration::from_millis(global_cd));
+                        generate_aether(hwnd, combat_basic, global_cd);
                         if skill.is_area {
-                            double_press_skill(hwnd, &skill.hotkey)
+                            double_press_skill(hwnd, &skill.hotkey);
+
                         } else {
-                            press_skill(hwnd, &skill.hotkey)
+                            press_skill(hwnd, &skill.hotkey);
+
                         }
+                        sleep_for_global_cd(skill, global_cd);
                     }
                 } else {
-                    std::thread::sleep(std::time::Duration::from_millis(global_cd));
                     if skill.is_area {
-                        double_press_skill(hwnd, &skill.hotkey)
+                        double_press_skill(hwnd, &skill.hotkey);
                     } else {
-                        press_skill(hwnd, &skill.hotkey)
+                        press_skill(hwnd, &skill.hotkey);
                     }
+                    sleep_for_global_cd(skill, global_cd);
                 }
             } else {
                 break;
@@ -276,30 +292,38 @@ fn defensive_skills(hwnd: HWND, hp_to_defense_light: &str, hp_to_defense_full: &
     } else if hp_need_restore(hp_to_defense_light) {
         for skill in combat_defense_light.iter(){
             if check_target(hwnd){
+                if skill.prereq != "" {
+                    press_skill(hwnd, &skill.prereq);
+                    sleep_for_global_cd(skill, global_cd);
+                }
                 if skill.aether {
                     if get_aether() > 49.0 {
-                        std::thread::sleep(std::time::Duration::from_millis(global_cd));
                         if skill.is_area {
-                            double_press_skill(hwnd, &skill.hotkey)
+                            double_press_skill(hwnd, &skill.hotkey);
+
                         } else {
-                            press_skill(hwnd, &skill.hotkey)
+                            press_skill(hwnd, &skill.hotkey);
+
                         }
+                        sleep_for_global_cd(skill, global_cd);
                     } else {
-                        generate_aether(hwnd, combat_basic);
-                        std::thread::sleep(std::time::Duration::from_millis(global_cd));
+                        generate_aether(hwnd, combat_basic, global_cd);
                         if skill.is_area {
-                            double_press_skill(hwnd, &skill.hotkey)
+                            double_press_skill(hwnd, &skill.hotkey);
+
                         } else {
-                            press_skill(hwnd, &skill.hotkey)
+                            press_skill(hwnd, &skill.hotkey);
+
                         }
+                        sleep_for_global_cd(skill, global_cd);
                     }
                 } else {
-                    std::thread::sleep(std::time::Duration::from_millis(global_cd));
                     if skill.is_area {
-                        double_press_skill(hwnd, &skill.hotkey)
+                        double_press_skill(hwnd, &skill.hotkey);
                     } else {
-                        press_skill(hwnd, &skill.hotkey)
+                        press_skill(hwnd, &skill.hotkey);
                     }
+                    sleep_for_global_cd(skill, global_cd);
                 }
             } else {
                 break;
@@ -312,36 +336,41 @@ fn combo_skills(hwnd: HWND, hp_to_defense_light: &str, hp_to_defense_full: &str,
     for skill in combat_combo.iter(){
         if check_target(hwnd){
             defensive_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_basic, global_cd);
+            if skill.prereq != "" {
+                press_skill(hwnd, &skill.prereq);
+                sleep_for_global_cd(skill, global_cd);
+            }
             if skill.aether {
                 if get_aether() > 49.0 {
                     if check_target(hwnd) {
-                        std::thread::sleep(std::time::Duration::from_millis(global_cd));
                         if skill.is_area {
-                            double_press_skill(hwnd, &skill.hotkey)
+                            double_press_skill(hwnd, &skill.hotkey);
+
                         } else {
-                            press_skill(hwnd, &skill.hotkey)
+                            press_skill(hwnd, &skill.hotkey);
+
                         }
+                        sleep_for_global_cd(skill, global_cd);
                     } else {
                         break;
                     }
                 } else {
-                    generate_aether(hwnd, combat_basic);
-                    std::thread::sleep(std::time::Duration::from_millis(global_cd));
+                    generate_aether(hwnd, combat_basic, global_cd);
                     if skill.is_area {
-                        double_press_skill(hwnd, &skill.hotkey)
+                        double_press_skill(hwnd, &skill.hotkey);
                     } else {
-                        press_skill(hwnd, &skill.hotkey)
+                        press_skill(hwnd, &skill.hotkey);
                     }
+                    sleep_for_global_cd(skill, global_cd);
                 }
             } else {
                 std::thread::sleep(std::time::Duration::from_millis(global_cd));
                 if skill.is_area {
-                    double_press_skill(hwnd, &skill.hotkey)
+                    double_press_skill(hwnd, &skill.hotkey);
                 } else {
-                    press_skill(hwnd, &skill.hotkey)
+                    press_skill(hwnd, &skill.hotkey);
                 }
             }
-            
         }
     }
 }
@@ -351,7 +380,7 @@ pub fn combat_instance(hwnd: HWND, hp_regen_passive: &str, mana_regen_passive: &
     while check_target(hwnd) {
         defensive_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_basic, global_cd);
         start_fight(hwnd, combat_start, combat_basic, global_cd);
-        generate_aether(hwnd, combat_basic);
+        generate_aether(hwnd, combat_basic, global_cd);
         combo_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_combo, combat_basic, global_cd);
     }
     

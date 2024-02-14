@@ -94,6 +94,8 @@ pub struct Skill {
     pub cooldown: u64,
     pub name: String,
     pub is_area: bool,
+    pub prereq: String,
+    pub has_global: bool
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
