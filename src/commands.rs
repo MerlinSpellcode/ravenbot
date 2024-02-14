@@ -1,5 +1,5 @@
 use winapi::shared::windef::HWND;
-use crate::utils::inputs::{press_w, press_a, press_s, press_d, press_skill, press_tab, spam_press_skill, spam_unpress_skill, double_press_skill};
+use crate::utils::inputs::{press_w, press_a, press_s, press_d, press_skill, press_tab, double_press_skill};
 use crate::utils::env::{Skill, BasicS};
 use crate::checks::{get_aether, hp_need_restore, mana_need_restore, is_hp_full, is_mana_full, get_target, get_coord};
 
@@ -378,6 +378,7 @@ fn combo_skills(hwnd: HWND, hp_to_defense_light: &str, hp_to_defense_full: &str,
 pub fn combat_instance(hwnd: HWND, hp_regen_passive: &str, mana_regen_passive: &str, hp_to_defense_light: &str, hp_to_defense_full: &str, combat_defense_light:&[Skill], combat_defense_full:&[Skill], combat_start: &[Skill], combat_combo: &[Skill], combat_basic: &[BasicS], global_cd: u64) {
     println!("@@ Start Combat Instance @@");
     while check_target(hwnd) {
+        std::thread::sleep(std::time::Duration::from_millis(2100));
         defensive_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_basic, global_cd);
         start_fight(hwnd, combat_start, combat_basic, global_cd);
         generate_aether(hwnd, combat_basic, global_cd);

@@ -17,18 +17,17 @@ use std::time::Duration;
 use ravenbot::utils::address::get_base_address;
 use ravenbot::utils::env::Config;
 use ravenbot::utils::env::Hunt;
+use ravenbot::utils::env::Skills;
+use ravenbot::utils::env::Combat;
 use ravenbot::commands::combat_instance;
 use ravenbot::commands::path_walker;
 use ravenbot::checks::get_coord;
 use ravenbot::checks::check_hwid;
 
-
-
 struct WindowInfo {
     game_p_id: DWORD,
     hwnd: HWND,
 }
-
 
 extern "system" fn enum_windows_callback(window: HWND, param: LPARAM) -> BOOL {
     let window_info = unsafe { &mut *(param as *mut WindowInfo) };
@@ -44,10 +43,33 @@ extern "system" fn enum_windows_callback(window: HWND, param: LPARAM) -> BOOL {
     1 // Retorna verdadeiro para continuar a enumeração
 }
 
+fn read_config() -> Config {
+
+    let config_combat: Combat = serde_json::from_str(&fs::read_to_string("config/combat.json")
+        .expect("Erro ao ler o arquivo combat.json"))
+        .expect("Erro ao deserializar o arquivo combat.json");
+    let config_skills: Skills = serde_json::from_str(&fs::read_to_string("config/skills.json")
+        .expect("Erro ao ler o arquivo skills.json"))
+        .expect("Erro ao deserializar o arquivo skills.json");
+    let config_hunts: Vec<Hunt> = serde_json::from_str(&fs::read_to_string("config/hunts.json")
+        .expect("Erro ao ler o arquivo hunts.json"))
+        .expect("Erro ao deserializar o arquivo hunts.json");
+    
+    let config_contents = Config {
+        hunts: config_hunts,
+        combat: config_combat,
+        skills: config_skills
+    };
+
+
+    return config_contents;
+}
+
 fn main_menu() -> io::Result<()> {
     println!("Selecione uma opção:");
     println!("1: Create Hunting Coordinates");
     println!("2: Hunting");
+    println!("3: Only Combat (Manual Walk)");
 
     let mut choice = String::new();
     io::stdin().read_line(&mut choice)?;
@@ -55,6 +77,7 @@ fn main_menu() -> io::Result<()> {
     match choice.trim() {
         "1" => create_hunting_coordinates(),
         "2" => hunting(),
+        "3" => only_combat(),
         _ => {
             println!("Opção inválida, por favor, tente novamente.");
             main_menu()
@@ -76,9 +99,8 @@ fn create_hunting_coordinates() -> io::Result<()> {
     io::stdin().read_line(&mut nome).expect("Falha ao ler a entrada");
     let nome = nome.trim().to_string();
 
-    let file_path = "config.json";
-    let file_content = fs::read_to_string(file_path).unwrap_or_else(|_| String::from("{\"hunts\":[], \"combat\": {}}")); // Inclui um combate padrão vazio
-    let mut config: Config = serde_json::from_str(&file_content).expect("Falha ao analisar JSON");
+    let file_path = "config/hunts.json";
+    let mut config = read_config();
 
     // Verifica se já existe uma caçada com o nome fornecido, se não, adiciona uma nova
     let hunt_index = config.hunts.iter().position(|h| h.name == nome);
@@ -104,7 +126,7 @@ fn create_hunting_coordinates() -> io::Result<()> {
                 }
     
                 // Agora que as modificações foram feitas, podemos serializar
-                let json_string = serde_json::to_string_pretty(&config).expect("Falha ao serializar JSON");
+                let json_string = serde_json::to_string_pretty(&config.hunts).expect("Falha ao serializar JSON");
                 fs::write(file_path, json_string.as_bytes()).expect("Falha ao escrever no arquivo");
     
                 thread::sleep(Duration::from_secs(1)); // Evita capturas duplicadas
@@ -114,8 +136,6 @@ fn create_hunting_coordinates() -> io::Result<()> {
     
     Ok(())
 }
-
-
 
 fn choose_hunt(hunts: &[Hunt]) -> Option<usize> {
     println!("Escolha uma caçada:");
@@ -137,10 +157,8 @@ fn choose_hunt(hunts: &[Hunt]) -> Option<usize> {
 
 #[tokio::main]
 async fn hunting() -> io::Result<()> {
-    let config_contents = fs::read_to_string("config.json")
-    .expect("Erro ao ler o arquivo config.json");
-    let config: Config = serde_json::from_str(&config_contents)
-    .expect("Erro ao deserializar config.json");
+
+    let config = read_config();
 
     // Escolha da caçada
     let hunt_choice = choose_hunt(&config.hunts).expect("Escolha inválida de caçada.");
@@ -149,11 +167,11 @@ async fn hunting() -> io::Result<()> {
     let mana_regen_passive = &config.combat.mana_regen_passive;
     let hp_to_defense_light = &config.combat.hp_to_defense_light;
     let hp_to_defense_full = &config.combat.hp_to_defense_full;
-    let combat_basic = &config.combat.basic;
-    let combat_start = &config.combat.start;
-    let combat_combo = &config.combat.combo;
-    let combat_defense_light = &config.combat.defense_light;
-    let combat_defense_full = &config.combat.defense_full;
+    let combat_basic = &config.skills.basic;
+    let combat_start = &config.skills.start;
+    let combat_combo = &config.skills.combo;
+    let combat_defense_light = &config.skills.defense_light;
+    let combat_defense_full = &config.skills.defense_full;
     let global_cd = &config.combat.global_cd;
     // Supondo que Skill derive Clone.
     // let mut combined_skills = combat_defense.clone(); // Cria uma cópia dos elementos de defense.
@@ -194,6 +212,59 @@ async fn hunting() -> io::Result<()> {
             println!("Para onde está indo: {:?}", path);
             path_walker(window_info.hwnd, *path, hp_regen_passive, mana_regen_passive, hp_to_defense_light, hp_to_defense_full, combat_basic, combat_start, combat_combo, combat_defense_light, combat_defense_full, *global_cd);
         }
+    }
+
+    Ok(())
+}
+
+#[tokio::main]
+async fn only_combat() -> io::Result<()> {
+
+    let config = read_config();
+
+    let hp_regen_passive = &config.combat.hp_regen_passive;
+    let mana_regen_passive = &config.combat.mana_regen_passive;
+    let hp_to_defense_light = &config.combat.hp_to_defense_light;
+    let hp_to_defense_full = &config.combat.hp_to_defense_full;
+    let combat_basic = &config.skills.basic;
+    let combat_start = &config.skills.start;
+    let combat_combo = &config.skills.combo;
+    let combat_defense_light = &config.skills.defense_light;
+    let combat_defense_full = &config.skills.defense_full;
+    let global_cd = &config.combat.global_cd;
+
+    let (_base_address, process_id) = match get_base_address() {
+        Some(data) => data,
+        None => {
+            eprintln!("Erro ao encontrar o endereço base do módulo");
+            return Err(io::Error::new(io::ErrorKind::Other, "Erro ao encontrar o endereço base do módulo"));
+        }
+    };
+
+    let mut window_info = WindowInfo {
+        game_p_id: process_id,
+        hwnd: ptr::null_mut(),
+    };
+
+    unsafe {
+        EnumWindows(Some(enum_windows_callback), &mut window_info as *mut _ as LPARAM);
+    }
+    
+    if window_info.hwnd.is_null() {
+        eprintln!("Janela não encontrada");
+        return Err(io::Error::new(io::ErrorKind::Other, "Janela não encontrada"));
+    }
+
+    let running = Arc::new(AtomicBool::new(true));
+    let r = running.clone();
+
+    ctrlc::set_handler(move || {
+        r.store(false, Ordering::SeqCst);
+    }).expect("Erro ao definir o manipulador de Ctrl-C");
+
+    while running.load(Ordering::SeqCst) {
+        println!("Iniciando apenas combate. Walk apenas manual.");
+        combat_instance(window_info.hwnd, hp_regen_passive, mana_regen_passive, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_start, combat_combo, combat_basic, *global_cd);
     }
 
     Ok(())

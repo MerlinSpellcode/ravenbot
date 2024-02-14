@@ -1,0 +1,177 @@
+{
+    "basic": [
+      {
+        "hotkey": "E",
+        "mana": 16,
+        "name": "Arcane Pulse"
+      }
+    ],
+    "start": [
+        {
+          "hotkey": "Q",
+          "mana": 33,
+          "aether": false,
+          "cooldown": 15,
+          "name": "Curse",
+          "is_area": false,
+          "prereq": "",
+          "has_global": true
+        },
+        {
+          "hotkey": "Z",
+          "mana": 80,
+          "aether": false,
+          "cooldown": 15,
+          "name": "Leech",
+          "is_area": false,
+          "prereq": "",
+          "has_global": true
+        },
+        {
+          "hotkey": "C",
+          "mana": 112,
+          "aether": false,
+          "cooldown": 30,
+          "name": "Magic Rupture",
+          "is_area": false,
+          "prereq": "",
+          "has_global": true
+        },
+        {
+          "hotkey": "F4",
+          "mana": 49,
+          "aether": true,
+          "cooldown": 15,
+          "name": "Erupt",
+          "is_area": false,
+          "prereq": "",
+          "has_global": true
+        },
+        {
+          "hotkey": "5",
+          "mana": 192,
+          "aether": false,
+          "cooldown": 60,
+          "name": "Shackles Of Pain",
+          "is_area": false,
+          "prereq": "",
+          "has_global": false
+        }
+    ],
+    "combo": [
+        {
+          "hotkey": "F3",
+          "mana": 199,
+          "aether": true,
+          "cooldown": 60,
+          "name": "Death Pulse",
+          "is_area": false,
+          "prereq": "Q",
+          "has_global": true
+        },
+        {
+          "hotkey": "R",
+          "mana": 64,
+          "aether": true,
+          "cooldown": 20,
+          "name": "Arcane Torrent",
+          "is_area": false,
+          "prereq": "",
+          "has_global": true
+        },
+        {
+          "hotkey": "F1",
+          "mana": 195,
+          "aether": true,
+          "cooldown": 35,
+          "name": "Pyroblast",
+          "is_area": false,
+          "prereq": "",
+          "has_global": true
+        },
+        {
+          "hotkey": "F2",
+          "mana": 66,
+          "aether": true,
+          "cooldown": 15,
+          "name": "Frost Shards",
+          "is_area": false,
+          "prereq": "",
+          "has_global": true
+        },
+        {
+          "hotkey": "F5",
+          "mana": 83,
+          "aether": true,
+          "cooldown": 20,
+          "name": "Frost Lance",
+          "is_area": false,
+          "prereq": "",
+          "has_global": true
+        }
+    ],
+    "defense_light": [
+        {
+          "hotkey": "3",
+          "mana": 448,
+          "aether": true,
+          "cooldown": 25,
+          "name": "Healing Channel",
+          "is_area": false,
+          "prereq": "",
+          "has_global": true
+        },
+        {
+          "hotkey": "F11",
+          "mana": 0,
+          "aether": false,
+          "cooldown": 45,
+          "name": "HP Potion",
+          "is_area": false,
+          "prereq": "",
+          "has_global": false
+        }
+    ],
+    "defense_full": [
+        {
+          "hotkey": "6",
+          "mana": 240,
+          "aether": false,
+          "cooldown": 120,
+          "name": "Living Saint",
+          "is_area": false,
+          "prereq": "",
+          "has_global": true
+        },
+        {
+          "hotkey": "2",
+          "mana": 352,
+          "aether": true,
+          "cooldown": 10,
+          "name": "Dawn's Light",
+          "is_area": false,
+          "prereq": "",
+          "has_global": true
+        },
+        {
+          "hotkey": "3",
+          "mana": 448,
+          "aether": true,
+          "cooldown": 25,
+          "name": "Healing Channel",
+          "is_area": false,
+          "prereq": "",
+          "has_global": true
+        },
+        {
+          "hotkey": "F11",
+          "mana": 0,
+          "aether": false,
+          "cooldown": 45,
+          "name": "HP Potion",
+          "is_area": false,
+          "prereq": "",
+          "has_global": false
+        }
+    ]
+}

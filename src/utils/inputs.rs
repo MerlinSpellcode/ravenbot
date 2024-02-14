@@ -55,14 +55,14 @@ pub fn double_press_skill(hwnd: HWND, skill: &str){
     thread::sleep(Duration::from_millis(100));
 }
 
-pub fn spam_press_skill(hwnd: HWND, skill: &str) {
-    let hotkey = HOTKEYS.get(skill).expect("Hotkey not found");
-    unsafe { PostMessageA(hwnd, WM_KEYDOWN, *hotkey as usize, 0); }
-    thread::sleep(Duration::from_millis(100));
-}
+// pub fn spam_press_skill(hwnd: HWND, skill: &str) {
+//     let hotkey = HOTKEYS.get(skill).expect("Hotkey not found");
+//     unsafe { PostMessageA(hwnd, WM_KEYDOWN, *hotkey as usize, 0); }
+//     thread::sleep(Duration::from_millis(100));
+// }
 
-pub fn spam_unpress_skill(hwnd: HWND, skill: &str) {
-    let hotkey = HOTKEYS.get(skill).expect("Hotkey not found");
-    unsafe { PostMessageA(hwnd, WM_KEYUP, *hotkey as usize, 0); }
-    thread::sleep(Duration::from_millis(100));
-}
+// pub fn spam_unpress_skill(hwnd: HWND, skill: &str) {
+//     let hotkey = HOTKEYS.get(skill).expect("Hotkey not found");
+//     unsafe { PostMessageA(hwnd, WM_KEYUP, *hotkey as usize, 0); }
+//     thread::sleep(Duration::from_millis(100));
+// }

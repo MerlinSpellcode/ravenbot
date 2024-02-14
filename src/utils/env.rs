@@ -59,11 +59,20 @@ lazy_static! {
     };
 }
 
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
     pub hunts: Vec<Hunt>,
-    pub combat: Combat, // Adicione esta linha para incluir o campo combat
+    pub combat: Combat, 
+    pub skills: Skills,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Skills {
+    pub basic: Vec<BasicS>,
+    pub start: Vec<Skill>,
+    pub combo: Vec<Skill>,
+    pub defense_light: Vec<Skill>,
+    pub defense_full: Vec<Skill>, 
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -78,12 +87,7 @@ pub struct Combat {
     pub mana_regen_passive: String,
     pub hp_to_defense_light: String,
     pub hp_to_defense_full: String,
-    pub basic: Vec<BasicS>,
     pub global_cd: u64,
-    pub start: Vec<Skill>,
-    pub combo: Vec<Skill>,
-    pub defense_light: Vec<Skill>,
-    pub defense_full: Vec<Skill>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
