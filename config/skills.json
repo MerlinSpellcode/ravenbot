@@ -112,14 +112,14 @@
     ],
     "defense_light": [
         {
-          "hotkey": "3",
-          "mana": 448,
-          "aether": true,
-          "cooldown": 25,
-          "name": "Healing Channel",
-          "is_area": false,
-          "prereq": "",
-          "has_global": true
+            "hotkey": "F6",
+            "mana": 120,
+            "aether": false,
+            "cooldown": 30,
+            "name": "Eternal Worms",
+            "is_area": false,
+            "prereq": "",
+            "has_global": true
         },
         {
           "hotkey": "F11",
@@ -130,9 +130,29 @@
           "is_area": false,
           "prereq": "",
           "has_global": false
+        },
+        {
+            "hotkey": "3",
+            "mana": 448,
+            "aether": true,
+            "cooldown": 25,
+            "name": "Healing Channel",
+            "is_area": false,
+            "prereq": "",
+            "has_global": true
         }
     ],
     "defense_full": [
+        {
+            "hotkey": "F11",
+            "mana": 0,
+            "aether": false,
+            "cooldown": 45,
+            "name": "HP Potion",
+            "is_area": false,
+            "prereq": "",
+            "has_global": false
+        },
         {
           "hotkey": "6",
           "mana": 240,
@@ -162,16 +182,6 @@
           "is_area": false,
           "prereq": "",
           "has_global": true
-        },
-        {
-          "hotkey": "F11",
-          "mana": 0,
-          "aether": false,
-          "cooldown": 45,
-          "name": "HP Potion",
-          "is_area": false,
-          "prereq": "",
-          "has_global": false
         }
     ]
 }
