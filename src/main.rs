@@ -147,13 +147,17 @@ async fn hunting() -> io::Result<()> {
     let selected_hunt = &config.hunts[hunt_choice];
     let hp_regen_passive = &config.combat.hp_regen_passive;
     let mana_regen_passive = &config.combat.mana_regen_passive;
-    let hp_to_defense = &config.combat.hp_to_defense;
+    let hp_to_defense_light = &config.combat.hp_to_defense_light;
+    let hp_to_defense_full = &config.combat.hp_to_defense_full;
     let combat_basic = &config.combat.basic;
-    let combat_damage = &config.combat.damage;
-    let combat_defense = &config.combat.defense;
+    let combat_start = &config.combat.start;
+    let combat_combo = &config.combat.combo;
+    let combat_defense_light = &config.combat.defense_light;
+    let combat_defense_full = &config.combat.defense_full;
+    let global_cd = &config.combat.global_cd;
     // Supondo que Skill derive Clone.
-    let mut combined_skills = combat_defense.clone(); // Cria uma cópia dos elementos de defense.
-    combined_skills.extend(combat_damage.clone()); // Já está clonando, então 'cloned()' não é necessário.
+    // let mut combined_skills = combat_defense.clone(); // Cria uma cópia dos elementos de defense.
+    // combined_skills.extend(combat_damage.clone()); // Já está clonando, então 'cloned()' não é necessário.
 
     let (_base_address, process_id) = match get_base_address() {
         Some(data) => data,
@@ -186,9 +190,9 @@ async fn hunting() -> io::Result<()> {
 
     while running.load(Ordering::SeqCst) {
         for path in selected_hunt.route.iter() {
-            combat_instance(window_info.hwnd, hp_regen_passive, mana_regen_passive, hp_to_defense, combat_basic, combat_damage, &combined_skills);
+            combat_instance(window_info.hwnd, hp_regen_passive, mana_regen_passive, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_start, combat_combo, combat_basic, *global_cd);
             println!("Para onde está indo: {:?}", path);
-            path_walker(window_info.hwnd, *path, hp_regen_passive, mana_regen_passive, hp_to_defense, combat_basic, combat_damage, &combined_skills);
+            path_walker(window_info.hwnd, *path, hp_regen_passive, mana_regen_passive, hp_to_defense_light, hp_to_defense_full, combat_basic, combat_start, combat_combo, combat_defense_light, combat_defense_full, *global_cd);
         }
     }
 
