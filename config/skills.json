@@ -56,18 +56,58 @@
           "is_area": false,
           "prereq": "",
           "has_global": false
+        },
+        {
+            "hotkey": "1",
+            "mana": 50,
+            "aether": true,
+            "cooldown": 20,
+            "name": "Viper Arrow",
+            "is_area": false,
+            "prereq": "",
+            "has_global": true
+        },
+        {
+            "hotkey": "3",
+            "mana": 101,
+            "aether": false,
+            "cooldown": 30,
+            "name": "Dawn Arrow",
+            "is_area": true,
+            "prereq": "",
+            "has_global": true
         }
     ],
     "combo": [
         {
-          "hotkey": "F3",
-          "mana": 199,
-          "aether": true,
-          "cooldown": 60,
-          "name": "Death Pulse",
-          "is_area": false,
-          "prereq": "Q",
-          "has_global": true
+            "hotkey": "F1",
+            "mana": 195,
+            "aether": true,
+            "cooldown": 35,
+            "name": "Pyroblast",
+            "is_area": false,
+            "prereq": "",
+            "has_global": true
+        },
+        {
+            "hotkey": "4",
+            "mana": 169,
+            "aether": true,
+            "cooldown": 45,
+            "name": "Dragons Arrow",
+            "is_area": false,
+            "prereq": "",
+            "has_global": true
+        },
+        {
+            "hotkey": "F3",
+            "mana": 199,
+            "aether": true,
+            "cooldown": 60,
+            "name": "Death Pulse",
+            "is_area": false,
+            "prereq": "Q",
+            "has_global": true
         },
         {
           "hotkey": "R",
@@ -80,14 +120,24 @@
           "has_global": true
         },
         {
-          "hotkey": "F1",
-          "mana": 195,
-          "aether": true,
-          "cooldown": 35,
-          "name": "Pyroblast",
-          "is_area": false,
-          "prereq": "",
-          "has_global": true
+            "hotkey": "2",
+            "mana": 84,
+            "aether": true,
+            "cooldown": 30,
+            "name": "Precision Shot",
+            "is_area": false,
+            "prereq": "",
+            "has_global": true
+        },
+        {
+            "hotkey": "F5",
+            "mana": 83,
+            "aether": true,
+            "cooldown": 20,
+            "name": "Frost Lance",
+            "is_area": false,
+            "prereq": "",
+            "has_global": true
         },
         {
           "hotkey": "F2",
@@ -95,16 +145,6 @@
           "aether": true,
           "cooldown": 15,
           "name": "Frost Shards",
-          "is_area": false,
-          "prereq": "",
-          "has_global": true
-        },
-        {
-          "hotkey": "F5",
-          "mana": 83,
-          "aether": true,
-          "cooldown": 20,
-          "name": "Frost Lance",
           "is_area": false,
           "prereq": "",
           "has_global": true
@@ -118,7 +158,7 @@
             "cooldown": 30,
             "name": "Eternal Worms",
             "is_area": false,
-            "prereq": "",
+            "prereq": "F4",
             "has_global": true
         },
         {
@@ -130,58 +170,28 @@
           "is_area": false,
           "prereq": "",
           "has_global": false
-        },
-        {
-            "hotkey": "3",
-            "mana": 448,
-            "aether": true,
-            "cooldown": 25,
-            "name": "Healing Channel",
-            "is_area": false,
-            "prereq": "",
-            "has_global": true
         }
     ],
     "defense_full": [
         {
-            "hotkey": "F11",
-            "mana": 0,
+            "hotkey": "F6",
+            "mana": 120,
             "aether": false,
-            "cooldown": 45,
-            "name": "HP Potion",
+            "cooldown": 30,
+            "name": "Eternal Worms",
             "is_area": false,
-            "prereq": "",
-            "has_global": false
+            "prereq": "F4",
+            "has_global": true
         },
         {
-          "hotkey": "6",
-          "mana": 240,
+          "hotkey": "F11",
+          "mana": 0,
           "aether": false,
-          "cooldown": 120,
-          "name": "Living Saint",
+          "cooldown": 45,
+          "name": "HP Potion",
           "is_area": false,
           "prereq": "",
-          "has_global": true
-        },
-        {
-          "hotkey": "2",
-          "mana": 352,
-          "aether": true,
-          "cooldown": 10,
-          "name": "Dawn's Light",
-          "is_area": false,
-          "prereq": "",
-          "has_global": true
-        },
-        {
-          "hotkey": "3",
-          "mana": 448,
-          "aether": true,
-          "cooldown": 25,
-          "name": "Healing Channel",
-          "is_area": false,
-          "prereq": "",
-          "has_global": true
+          "has_global": false
         }
     ]
 }

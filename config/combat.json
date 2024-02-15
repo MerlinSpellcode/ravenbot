@@ -1,7 +1,7 @@
 {
     "hp_regen_passive": "70%",
     "mana_regen_passive": "70%",
-    "hp_to_defense_light": "50%",
-    "hp_to_defense_full": "30%",
+    "hp_to_defense_light": "60%",
+    "hp_to_defense_full": "40%",
     "global_cd": 1120
 }

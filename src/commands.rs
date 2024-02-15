@@ -1,7 +1,7 @@
 use winapi::shared::windef::HWND;
 use crate::utils::inputs::{press_w, press_a, press_s, press_d, press_skill, press_tab, double_press_skill};
 use crate::utils::env::{Skill, BasicS};
-use crate::checks::{get_aether, hp_need_restore, mana_need_restore, is_hp_full, is_mana_full, get_target, get_coord};
+use crate::checks::{get_aether, hp_need_restore, mana_need_restore, is_hp_full, is_mana_full, get_target, get_coord, get_mana_actual, get_hp_actual};
 
 // use tokio::time::{Duration, Instant};
 // use std::collections::HashMap;
@@ -384,6 +384,9 @@ pub fn combat_instance(hwnd: HWND, hp_regen_passive: &str, mana_regen_passive: &
         generate_aether(hwnd, combat_basic, global_cd);
         combo_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_combo, combat_basic, global_cd);
     }
+
+    get_hp_actual();
+    get_mana_actual();
     
     if hp_need_restore(hp_regen_passive) {
         println!("HP needs restore");

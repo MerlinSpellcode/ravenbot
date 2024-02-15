@@ -28,6 +28,18 @@ pub fn get_mana_current() -> f64 {
     value
 }
 
+pub fn get_mana_actual() {
+    let mana_current = get_mana_current();
+    let mana_max = get_mana_max();
+    println!("Mana: {}/{}", mana_current, mana_max);
+}
+
+pub fn get_hp_actual() {
+    let hp_current = get_hp_current();
+    let hp_max = get_hp_max();
+    println!("HP: {}/{}", hp_current, hp_max);
+}
+
 pub fn mana_need_restore(value_percent: &str) -> bool {
     let mana_current = get_mana_current();
     let mana_max = get_mana_max();
