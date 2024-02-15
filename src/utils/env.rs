@@ -4,6 +4,9 @@ use serde::{Serialize, Deserialize};
 use std::fs::File;
 use std::io::{Read};
 use base64::{decode};
+use serde_json;
+use std::str::FromStr;
+
 
 lazy_static! {
     pub static ref HOTKEYS: HashMap<&'static str, u8> = {
@@ -128,36 +131,84 @@ pub struct HardwareInfo {
     pub memory_path: String,
 }
 
-// Função para decodificar e retornar o hwid
-pub fn decode_hwid() -> String {
-    let mut file = File::open("key.txt").unwrap();
-    let mut encoded = String::new();
-    file.read_to_string(&mut encoded).unwrap();
+#[derive(Serialize, Deserialize, Debug)]
+struct EncodedHardwareInfo {
+    key: String,
+}
 
-    let decoded = decode(encoded).unwrap(); // Unwrap the decoded result
-    let serialized = String::from_utf8_lossy(&decoded);
-    let hw_info: HardwareInfo = serde_json::from_str(&serialized).unwrap();
+pub fn decode_hwid() -> String {
+    let file_path = "key.json";
+    let mut file = match File::open(file_path) {
+        Ok(file) => file,
+        Err(_) => panic!("Não foi possível abrir o arquivo {}", file_path),
+    };
+    
+    let mut contents = String::new();
+    if let Err(_) = file.read_to_string(&mut contents) {
+        panic!("Falha ao ler o arquivo {}", file_path);
+    }
+    
+    let encoded: EncodedHardwareInfo = match serde_json::from_str(&contents) {
+        Ok(encoded) => encoded,
+        Err(_) => panic!("Falha ao decodificar JSON"),
+    };
+    
+    let decoded_bytes = match decode(&encoded.key) {
+        Ok(bytes) => bytes,
+        Err(_) => panic!("Falha ao decodificar Base64"),
+    };
+    
+    let decoded_str = match String::from_utf8(decoded_bytes) {
+        Ok(str) => str,
+        Err(_) => panic!("Falha ao converter bytes decodificados para String"),
+    };
+    
+    let hw_info: HardwareInfo = match serde_json::from_str(&decoded_str) {
+        Ok(info) => info,
+        Err(_) => panic!("Falha ao deserializar informações de hardware"),
+    };
 
     hw_info.hwid
 }
 
-// Função para decodificar o memory path e retornar como usize
+// Decodifica o memory path e retorna como usize
 pub fn decode_mempath() -> usize {
-    let mut file = File::open("key.txt").unwrap();
-    let mut encoded = String::new();
-    file.read_to_string(&mut encoded).unwrap();
+    let file_path = "key.json";
+    let mut file = match File::open(file_path) {
+        Ok(file) => file,
+        Err(_) => panic!("Não foi possível abrir o arquivo {}", file_path),
+    };
+    
+    let mut contents = String::new();
+    if let Err(_) = file.read_to_string(&mut contents) {
+        panic!("Falha ao ler o arquivo {}", file_path);
+    }
+    
+    let encoded: EncodedHardwareInfo = match serde_json::from_str(&contents) {
+        Ok(encoded) => encoded,
+        Err(_) => panic!("Falha ao decodificar JSON"),
+    };
+    
+    let decoded_bytes = match decode(&encoded.key) {
+        Ok(bytes) => bytes,
+        Err(_) => panic!("Falha ao decodificar Base64"),
+    };
+    
+    let decoded_str = match String::from_utf8(decoded_bytes) {
+        Ok(str) => str,
+        Err(_) => panic!("Falha ao converter bytes decodificados para String"),
+    };
+    
+    let hw_info: HardwareInfo = match serde_json::from_str(&decoded_str) {
+        Ok(info) => info,
+        Err(_) => panic!("Falha ao deserializar informações de hardware"),
+    };
 
-    let decoded = decode(encoded).unwrap(); // Unwrap the decoded result
-    let serialized = String::from_utf8_lossy(&decoded);
-    let mempath_info: HardwareInfo = serde_json::from_str(&serialized).unwrap(); // Unwrap the Result to obtain HardwareInfo
-    println!("{:?}", mempath_info.memory_path);
-    // Remove o prefixo "0x" se presente
-    let mempath_str = mempath_info.memory_path.trim_start_matches("0x");
-
-    // Aqui você precisa converter o memory_path (sem o prefixo "0x") para usize
-    let mempath_usize = usize::from_str_radix(mempath_str, 16).expect("Falha ao converter memory_path para usize");
-
-    mempath_usize
+    let mempath_str = hw_info.memory_path.trim_start_matches("0x");
+    match usize::from_str_radix(mempath_str, 16) {
+        Ok(num) => num,
+        Err(_) => panic!("Falha ao converter memory_path para usize"),
+    }
 }
 
 
