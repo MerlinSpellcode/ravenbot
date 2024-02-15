@@ -3,5 +3,5 @@
     "mana_regen_passive": "70%",
     "hp_to_defense_light": "60%",
     "hp_to_defense_full": "40%",
-    "global_cd": 1120
+    "global_cd": 1500
 }

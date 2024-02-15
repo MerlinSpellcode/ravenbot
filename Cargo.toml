@@ -6,6 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+aes-gcm = "0.10.0"
+aes = "0.7.4"
+rand = "0.8.4"
 once_cell = "1.8.0"
 lazy_static = "1.4.0"
 serde = { version = "1.0", features = ["derive"] }
@@ -14,4 +17,5 @@ serde_derive = "1.0"
 winapi = { version = "0.3", features = ["psapi", "winuser", "windef", "memoryapi", "processthreadsapi", "winnt", "handleapi", "tlhelp32"] }
 tokio = { version = "1", features = ["full"] }
 ctrlc = "3.1.9"
+base64 = "0.13.0"
 
