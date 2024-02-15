@@ -2,8 +2,8 @@ use lazy_static::lazy_static;
 use std::collections::HashMap;
 use serde::{Serialize, Deserialize};
 use std::fs::File;
-use std::io::{Read};
-use base64::{decode};
+use std::io::Read;
+use base64::decode;
 
 lazy_static! {
     pub static ref HOTKEYS: HashMap<&'static str, u8> = {
