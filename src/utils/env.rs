@@ -1,6 +1,6 @@
 use lazy_static::lazy_static;
 use std::collections::HashMap;
-use winapi::shared::minwindef::{DWORD};
+use winapi::shared::minwindef::DWORD;
 use serde::{Serialize, Deserialize};
 
 
@@ -59,11 +59,20 @@ lazy_static! {
     };
 }
 
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Config {
     pub hunts: Vec<Hunt>,
-    pub combat: Combat, // Adicione esta linha para incluir o campo combat
+    pub combat: Combat, 
+    pub skills: Skills,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Skills {
+    pub basic: Vec<BasicS>,
+    pub start: Vec<Skill>,
+    pub combo: Vec<Skill>,
+    pub defense_light: Vec<Skill>,
+    pub defense_full: Vec<Skill>, 
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -76,10 +85,9 @@ pub struct Hunt {
 pub struct Combat {
     pub hp_regen_passive: String,
     pub mana_regen_passive: String,
-    pub hp_to_defense: String,
-    pub basic: Vec<BasicS>,
-    pub damage: Vec<Skill>,
-    pub defense: Vec<Skill>,
+    pub hp_to_defense_light: String,
+    pub hp_to_defense_full: String,
+    pub global_cd: u64,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -89,6 +97,20 @@ pub struct Skill {
     pub aether: bool,
     pub cooldown: u64,
     pub name: String,
+    pub is_area: bool,
+    pub prereq: String,
+    pub has_global: bool
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Food {
+    pub hotkey: String,
+    pub duration: u64,
+    pub name: String,
+}
+
+pub struct Buffs {
+    pub food: Vec<Food>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -121,22 +143,23 @@ pub const VK_F2: u8 = 0x71;
 pub const VK_F5: u8 = 0x74;
 pub const VK_F6: u8 = 0x75;
 pub const VK_TAB: u8 = 0x09;
-// pub const VK_F7: u8 = 0x76;
-// pub const VK_F8: u8 = 0x77;
+pub const VK_F7: u8 = 0x76;
+pub const VK_F8: u8 = 0x77;
 pub const VK_F9: u8 = 0x78;
 pub const VK_F10: u8 = 0x79;
-// pub const VK_F11: u8 = 0x7A;
-// pub const VK_F12: u8 = 0x7B;
+pub const VK_F11: u8 = 0x7A;
+pub const VK_F12: u8 = 0x7B;
+
 pub const PROCESS_ID: DWORD = 60004;
-pub const HP_CURRENT: [usize; 2] = [0x027C3BA0, 0xCE0];
-pub const HP_MAX: [usize; 2] = [0x027C3BA0, 0xCE8];
-pub const MANA_MAX: [usize; 2] = [0x027C3BA0, 0xDE0];
-pub const MANA_CURRENT: [usize; 2] = [0x027C3BA0, 0xD28];
-pub const AETHER: [usize; 2] = [0x027C3BA0, 0xD60];
-pub const TARGET_CHECK: [usize; 2] = [0x027C3BA0, 0x84C];
-pub const P_X: [usize; 2] = [0x027C3BA0, 0x18];
-pub const P_Y: [usize; 2] = [0x027C3BA0, 0x1C];
-pub const P_Z: [usize; 2] = [0x027C3BA0, 0x20];
+pub const HP_CURRENT: [usize; 2] = [0x027C4BA0, 0xCE0];
+pub const HP_MAX: [usize; 2] = [0x027C4BA0, 0xCE8];
+pub const MANA_MAX: [usize; 2] = [0x027C4BA0, 0xD30];
+pub const MANA_CURRENT: [usize; 2] = [0x027C4BA0, 0xD28];
+pub const AETHER: [usize; 2] = [0x027C4BA0, 0xD60];
+pub const TARGET_CHECK: [usize; 2] = [0x027C4BA0, 0x84C];
+pub const P_X: [usize; 2] = [0x027C4BA0, 0x18];
+pub const P_Y: [usize; 2] = [0x027C4BA0, 0x1C];
+pub const P_Z: [usize; 2] = [0x027C4BA0, 0x20];
 
 // pub const PATH_WALK: [[i32; 3]; 19] = [
 //     [4915, 5529, 5],
