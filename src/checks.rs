@@ -1,30 +1,41 @@
 
-use crate::utils::env::{BOT_OWNER, MANA_CURRENT, MANA_MAX, HP_CURRENT, HP_MAX, AETHER, TARGET_CHECK, P_X, P_Y, P_Z};
+use crate::utils::env::{decode_hwid, decode_mempath, MANA_CURRENT, MANA_MAX, HP_CURRENT, HP_MAX, AETHER, TARGET_CHECK, P_X, P_Y, P_Z};
 use crate::utils::address::{get_double_value_from_pointer_chain, get_value_memory};
 use std::process::Command;
 
 pub fn get_aether() -> f64 {
-    let value = get_double_value_from_pointer_chain(&AETHER);
+    let mempath_info = decode_mempath();
+    let mempath_pointer: [usize; 2] = [mempath_info, AETHER];
+    let value = get_double_value_from_pointer_chain(&mempath_pointer);
     value
 }
 
 pub fn get_hp_current() -> f64 {
-    let value = get_double_value_from_pointer_chain(&HP_CURRENT);
+    let mempath_info = decode_mempath();
+    let mempath_pointer: [usize; 2] = [mempath_info, HP_CURRENT];
+    let value = get_double_value_from_pointer_chain(&mempath_pointer);
     value
 }
 
+
 pub fn get_hp_max() -> f64 {
-    let value = get_double_value_from_pointer_chain(&HP_MAX);
+    let mempath_info = decode_mempath();
+    let mempath_pointer: [usize; 2] = [mempath_info, HP_MAX];
+    let value = get_double_value_from_pointer_chain(&mempath_pointer);
     value
 }
 
 pub fn get_mana_max() -> f64 {
-    let value = get_double_value_from_pointer_chain(&MANA_MAX);
+    let mempath_info = decode_mempath();
+    let mempath_pointer: [usize; 2] = [mempath_info, MANA_MAX];
+    let value = get_double_value_from_pointer_chain(&mempath_pointer);
     value
 }
 
 pub fn get_mana_current() -> f64 {
-    let value = get_double_value_from_pointer_chain(&MANA_CURRENT);
+    let mempath_info = decode_mempath();
+    let mempath_pointer: [usize; 2] = [mempath_info, MANA_CURRENT];
+    let value = get_double_value_from_pointer_chain(&mempath_pointer);
     value
 }
 
@@ -72,15 +83,20 @@ pub fn is_mana_full() -> bool {
 }
 
 pub fn get_target() -> bool {
-    let value = get_value_memory(TARGET_CHECK);
-    // eprintln!("Target: {}", value);
+    let mempath_info = decode_mempath();
+    let mempath_pointer: [usize; 2] = [mempath_info, TARGET_CHECK];
+    let value = get_value_memory(mempath_pointer);
     value != 0
 }
 
 pub fn get_coord() -> [i32; 3] {
-    let c_x = get_value_memory(P_X);
-    let c_y = get_value_memory(P_Y);
-    let c_z = get_value_memory(P_Z);
+    let mempath_info = decode_mempath();
+    let m_x: [usize; 2] = [mempath_info, P_X];
+    let m_y: [usize; 2] = [mempath_info, P_Y];
+    let m_z: [usize; 2] = [mempath_info, P_Z];
+    let c_x = get_value_memory(m_x);
+    let c_y = get_value_memory(m_y);
+    let c_z = get_value_memory(m_z);
     let c = [c_x, c_y, c_z];
     c
 }
@@ -95,7 +111,8 @@ pub fn check_hwid() -> bool {
         let raw_output = String::from_utf8_lossy(&output.stdout);
         for line in raw_output.lines() {
             if !line.starts_with("SerialNumber") {
-                return line.trim() == BOT_OWNER;
+                let hw_info = decode_hwid(); // Isso pode falhar, então estamos propagando o erro com `?`
+                return line.trim() == hw_info;
             }
         }
     }
