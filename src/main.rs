@@ -5,7 +5,6 @@ extern crate serde_json;
 use std::fs;
 use std::process;
 use std::io::{self, Write};
-use tokio::signal;
 use winapi::um::winuser::{GetAsyncKeyState, VK_F1};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -34,7 +33,7 @@ use ravenbot::checks::check_hwid;
 use std::time::Duration;
 use tokio::{time::interval, task};
 
-use chrono::{Local, TimeZone, Datelike, Timelike};
+use chrono::{Local, Timelike};
 
 struct WindowInfo {
     game_p_id: DWORD,
@@ -131,7 +130,7 @@ fn read_config() -> Config {
 }
 
 pub fn use_foods(foods: &Foods){
-    let brt = chrono::FixedOffset::west(3 * 3600); // Horário de Brasília (UTC-3)
+    let brt = chrono::FixedOffset::west_opt(3 * 3600).unwrap(); // Horário de Brasília (UTC-3)
     let current_time = Local::now().with_timezone(&brt);
     println!("Using foods at {:02}:{:02}:{:02} BRT..", current_time.hour(), current_time.minute(), current_time.second());
     press_skill(unsafe { WINDOW_HANDLE }, &foods.status);

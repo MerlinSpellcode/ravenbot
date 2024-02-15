@@ -6,7 +6,7 @@ use std::fs::File;
 use std::io::Read;
 use base64::decode;
 use serde_json;
-use std::str::FromStr;
+// use std::str::FromStr;
 
 lazy_static! {
     pub static ref HOTKEYS: HashMap<&'static str, u8> = {
