@@ -59,14 +59,23 @@ lazy_static! {
     };
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Config {
     pub hunts: Vec<Hunt>,
     pub combat: Combat, 
     pub skills: Skills,
+    pub foods: Foods
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Foods {
+    pub status: String,
+    pub hp_mana_regen: String,
+    pub attack_power: String,
+    pub timer: u64,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Skills {
     pub basic: Vec<BasicS>,
     pub start: Vec<Skill>,
@@ -75,13 +84,13 @@ pub struct Skills {
     pub defense_full: Vec<Skill>, 
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Hunt {
     pub name: String,
     pub route: Vec<[i32; 3]>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Combat {
     pub hp_regen_passive: String,
     pub mana_regen_passive: String,
@@ -113,7 +122,7 @@ pub struct Buffs {
     pub food: Vec<Food>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BasicS {
     pub hotkey: String,
     pub mana: u32,
@@ -151,15 +160,16 @@ pub const VK_F11: u8 = 0x7A;
 pub const VK_F12: u8 = 0x7B;
 
 pub const PROCESS_ID: DWORD = 60004;
-pub const HP_CURRENT: [usize; 2] = [0x027C4BA0, 0xCE0];
-pub const HP_MAX: [usize; 2] = [0x027C4BA0, 0xCE8];
-pub const MANA_MAX: [usize; 2] = [0x027C4BA0, 0xD30];
-pub const MANA_CURRENT: [usize; 2] = [0x027C4BA0, 0xD28];
-pub const AETHER: [usize; 2] = [0x027C4BA0, 0xD60];
-pub const TARGET_CHECK: [usize; 2] = [0x027C4BA0, 0x84C];
-pub const P_X: [usize; 2] = [0x027C4BA0, 0x18];
-pub const P_Y: [usize; 2] = [0x027C4BA0, 0x1C];
-pub const P_Z: [usize; 2] = [0x027C4BA0, 0x20];
+
+pub const HP_CURRENT: [usize; 2] = [0x027C6BC0, 0xCE0];
+pub const HP_MAX: [usize; 2] = [0x027C6BC0, 0xCE8];
+pub const MANA_MAX: [usize; 2] = [0x027C6BC0, 0xD30];
+pub const MANA_CURRENT: [usize; 2] = [0x027C6BC0, 0xD28];
+pub const AETHER: [usize; 2] = [0x027C6BC0, 0xD60];
+pub const TARGET_CHECK: [usize; 2] = [0x027C6BC0, 0x84C];
+pub const P_X: [usize; 2] = [0x027C6BC0, 0x18];
+pub const P_Y: [usize; 2] = [0x027C6BC0, 0x1C];
+pub const P_Z: [usize; 2] = [0x027C6BC0, 0x20];
 
 // pub const PATH_WALK: [[i32; 3]; 19] = [
 //     [4915, 5529, 5],
