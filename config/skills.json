@@ -66,16 +66,6 @@
             "is_area": false,
             "prereq": "",
             "has_global": true
-        },
-        {
-            "hotkey": "F8",
-            "mana": 50,
-            "aether": false,
-            "cooldown": 20,
-            "name": "ColdBlast",
-            "is_area": false,
-            "prereq": "",
-            "has_global": true
         }
     ],
     "combo": [
@@ -148,43 +138,43 @@
           "is_area": false,
           "prereq": "",
           "has_global": true
+        },
+        {
+            "hotkey": "3",
+            "mana": 101,
+            "aether": false,
+            "cooldown": 30,
+            "name": "Dawn Arrow",
+            "is_area": true,
+            "prereq": "",
+            "has_global": true
         }
     ],
     "defense_light": [
-        {
-            "hotkey": "C",
-            "mana": 120,
-            "aether": false,
-            "cooldown": 30,
-            "name": "Eternal Worms",
-            "is_area": false,
-            "prereq": "F10",
-            "has_global": true
-        },
-        {
-          "hotkey": "F3",
-          "mana": 0,
+      {
+        "hotkey": "F11",
+        "mana": 0,
+        "aether": false,
+        "cooldown": 45,
+        "name": "HP Potion",
+        "is_area": false,
+        "prereq": "",
+        "has_global": false
+      },
+      {
+          "hotkey": "F6",
+          "mana": 120,
           "aether": false,
-          "cooldown": 45,
-          "name": "HP Potion",
+          "cooldown": 30,
+          "name": "Eternal Worms",
           "is_area": false,
-          "prereq": "",
-          "has_global": false
-        }
-    ],
+          "prereq": "F4",
+          "has_global": true
+      }
+  ],
     "defense_full": [
-        {
-            "hotkey": "F6",
-            "mana": 120,
-            "aether": false,
-            "cooldown": 30,
-            "name": "Eternal Worms",
-            "is_area": false,
-            "prereq": "F10",
-            "has_global": true
-        },
-        {
-          "hotkey": "F3",
+      {
+          "hotkey": "F11",
           "mana": 0,
           "aether": false,
           "cooldown": 45,
@@ -192,6 +182,16 @@
           "is_area": false,
           "prereq": "",
           "has_global": false
-        }
-    ]
+      },
+      {
+          "hotkey": "F6",
+          "mana": 120,
+          "aether": false,
+          "cooldown": 30,
+          "name": "Eternal Worms",
+          "is_area": false,
+          "prereq": "F4",
+          "has_global": true
+      }
+  ]
 }

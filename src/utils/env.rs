@@ -2,11 +2,11 @@ use lazy_static::lazy_static;
 use std::collections::HashMap;
 use serde::{Serialize, Deserialize};
 use std::fs::File;
-use std::io::{Read};
-use base64::{decode};
+
+use std::io::Read;
+use base64::decode;
 use serde_json;
 use std::str::FromStr;
-
 
 lazy_static! {
     pub static ref HOTKEYS: HashMap<&'static str, u8> = {
@@ -63,14 +63,23 @@ lazy_static! {
     };
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Config {
     pub hunts: Vec<Hunt>,
     pub combat: Combat, 
     pub skills: Skills,
+    pub foods: Foods
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Foods {
+    pub status: String,
+    pub hp_mana_regen: String,
+    pub attack_power: String,
+    pub timer: u64,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Skills {
     pub basic: Vec<BasicS>,
     pub start: Vec<Skill>,
@@ -79,13 +88,13 @@ pub struct Skills {
     pub defense_full: Vec<Skill>, 
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Hunt {
     pub name: String,
     pub route: Vec<[i32; 3]>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Combat {
     pub hp_regen_passive: String,
     pub mana_regen_passive: String,
@@ -117,7 +126,7 @@ pub struct Buffs {
     pub food: Vec<Food>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct BasicS {
     pub hotkey: String,
     pub mana: u32,

@@ -17,5 +17,7 @@ serde_derive = "1.0"
 winapi = { version = "0.3", features = ["psapi", "winuser", "windef", "memoryapi", "processthreadsapi", "winnt", "handleapi", "tlhelp32"] }
 tokio = { version = "1", features = ["full"] }
 ctrlc = "3.1.9"
+libc = "0.2"
+chrono = "0.4"
 base64 = "0.13.0"
 

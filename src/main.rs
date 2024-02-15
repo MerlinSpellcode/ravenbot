@@ -5,28 +5,71 @@ extern crate serde_json;
 use std::fs;
 use std::process;
 use std::io::{self, Write};
-use winapi::um::winuser::{GetAsyncKeyState, VK_F1, EnumWindows, GetWindowThreadProcessId, IsWindowVisible};
+use tokio::signal;
+use winapi::um::winuser::{GetAsyncKeyState, VK_F1};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use winapi::shared::minwindef::{LPARAM, BOOL, DWORD};
-use winapi::shared::windef::HWND;
+use winapi::{
+    um::winuser::{EnumWindows, GetWindowThreadProcessId, IsWindowVisible},
+    shared::windef::HWND,
+};
 use std::ptr;
 use std::thread;
-use std::time::Duration;
+// use std::time::Duration;
 
 use ravenbot::utils::address::get_base_address;
 use ravenbot::utils::env::Config;
 use ravenbot::utils::env::Hunt;
 use ravenbot::utils::env::Skills;
 use ravenbot::utils::env::Combat;
+use ravenbot::utils::env::Foods;
+use ravenbot::utils::inputs::press_skill;
 use ravenbot::commands::combat_instance;
 use ravenbot::commands::path_walker;
+// use ravenbot::commands::use_foods;
 use ravenbot::checks::get_coord;
 use ravenbot::checks::check_hwid;
+
+use std::time::Duration;
+use tokio::{time::interval, task};
+
+use chrono::{Local, TimeZone, Datelike, Timelike};
 
 struct WindowInfo {
     game_p_id: DWORD,
     hwnd: HWND,
+}
+
+// Implementaçao de window global para não precisar passar entre threads
+static mut WINDOW_HANDLE: HWND = std::ptr::null_mut();
+
+fn get_window_handle() -> Result<HWND, io::Error> {
+
+    let (_base_address, process_id) = match get_base_address() {
+        Some(data) => data,
+        None => {
+            eprintln!("Erro ao encontrar o endereço base do módulo");
+            return Err(io::Error::new(io::ErrorKind::Other, "Erro ao encontrar o endereço base do módulo"));
+        }
+    };
+
+    let mut window_info = WindowInfo {
+        game_p_id: process_id,
+        hwnd: ptr::null_mut(),
+    };
+
+    unsafe {
+        EnumWindows(Some(enum_windows_callback), &mut window_info as *mut _ as LPARAM);
+    }
+    
+    if window_info.hwnd.is_null() {
+        eprintln!("Janela não encontrada");
+        return Err(io::Error::new(io::ErrorKind::Other, "Janela não encontrada"));
+    } else { 
+        unsafe { WINDOW_HANDLE = window_info.hwnd }
+        Ok(unsafe { WINDOW_HANDLE })
+    }
 }
 
 extern "system" fn enum_windows_callback(window: HWND, param: LPARAM) -> BOOL {
@@ -43,6 +86,24 @@ extern "system" fn enum_windows_callback(window: HWND, param: LPARAM) -> BOOL {
     1 // Retorna verdadeiro para continuar a enumeração
 }
 
+async fn run_timer_for_foods(foods: Foods, running: Arc<AtomicBool>) {
+    let _hwnd = match get_window_handle() {
+        Ok(hwnd) => hwnd,
+        Err(err) => {
+            eprintln!("Failed to get window handle: {}", err);
+            running.store(false, Ordering::SeqCst);
+            return;
+        }
+    };
+
+    let mut interval = interval(Duration::from_secs(foods.timer * 60)); // X minutos baseado no config
+
+    while running.load(Ordering::SeqCst) {
+        interval.tick().await;
+        use_foods(&foods);
+    }
+}
+
 fn read_config() -> Config {
 
     let config_combat: Combat = serde_json::from_str(&fs::read_to_string("config/combat.json")
@@ -54,18 +115,34 @@ fn read_config() -> Config {
     let config_hunts: Vec<Hunt> = serde_json::from_str(&fs::read_to_string("config/hunts.json")
         .expect("Erro ao ler o arquivo hunts.json"))
         .expect("Erro ao deserializar o arquivo hunts.json");
+    let config_foods: Foods = serde_json::from_str(&fs::read_to_string("config/foods.json")
+        .expect("Erro ao ler o arquivo foods.json"))
+        .expect("Erro ao deserializar o arquivo foods.json");
     
     let config_contents = Config {
         hunts: config_hunts,
         combat: config_combat,
-        skills: config_skills
+        skills: config_skills,
+        foods: config_foods
     };
 
 
     return config_contents;
 }
 
+pub fn use_foods(foods: &Foods){
+    let brt = chrono::FixedOffset::west(3 * 3600); // Horário de Brasília (UTC-3)
+    let current_time = Local::now().with_timezone(&brt);
+    println!("Using foods at {:02}:{:02}:{:02} BRT..", current_time.hour(), current_time.minute(), current_time.second());
+    press_skill(unsafe { WINDOW_HANDLE }, &foods.status);
+    press_skill(unsafe { WINDOW_HANDLE }, &foods.attack_power);
+    press_skill(unsafe { WINDOW_HANDLE }, &foods.hp_mana_regen);
+}
+
 fn main_menu() -> io::Result<()> {
+
+    let config = read_config();
+
     println!("Selecione uma opção:");
     println!("1: Create Hunting Coordinates");
     println!("2: Hunting");
@@ -76,13 +153,14 @@ fn main_menu() -> io::Result<()> {
 
     match choice.trim() {
         "1" => create_hunting_coordinates(),
-        "2" => hunting(),
-        "3" => only_combat(),
+        "2" => hunting(config),
+        "3" => only_combat(config),
         _ => {
             println!("Opção inválida, por favor, tente novamente.");
             main_menu()
         },
     }
+
 }
 
 fn create_hunting_coordinates() -> io::Result<()> {
@@ -156,48 +234,20 @@ fn choose_hunt(hunts: &[Hunt]) -> Option<usize> {
 }
 
 #[tokio::main]
-async fn hunting() -> io::Result<()> {
+async fn hunting(config: Config) -> io::Result<()> {
 
-    let config = read_config();
-
-    // Escolha da caçada
     let hunt_choice = choose_hunt(&config.hunts).expect("Escolha inválida de caçada.");
-    let selected_hunt = &config.hunts[hunt_choice];
-    let hp_regen_passive = &config.combat.hp_regen_passive;
-    let mana_regen_passive = &config.combat.mana_regen_passive;
-    let hp_to_defense_light = &config.combat.hp_to_defense_light;
-    let hp_to_defense_full = &config.combat.hp_to_defense_full;
-    let combat_basic = &config.skills.basic;
-    let combat_start = &config.skills.start;
-    let combat_combo = &config.skills.combo;
-    let combat_defense_light = &config.skills.defense_light;
-    let combat_defense_full = &config.skills.defense_full;
-    let global_cd = &config.combat.global_cd;
-    // Supondo que Skill derive Clone.
-    // let mut combined_skills = combat_defense.clone(); // Cria uma cópia dos elementos de defense.
-    // combined_skills.extend(combat_damage.clone()); // Já está clonando, então 'cloned()' não é necessário.
-
-    let (_base_address, process_id) = match get_base_address() {
-        Some(data) => data,
-        None => {
-            eprintln!("Erro ao encontrar o endereço base do módulo");
-            return Err(io::Error::new(io::ErrorKind::Other, "Erro ao encontrar o endereço base do módulo"));
-        }
-    };
-
-    let mut window_info = WindowInfo {
-        game_p_id: process_id,
-        hwnd: ptr::null_mut(),
-    };
-
-    unsafe {
-        EnumWindows(Some(enum_windows_callback), &mut window_info as *mut _ as LPARAM);
-    }
-    
-    if window_info.hwnd.is_null() {
-        eprintln!("Janela não encontrada");
-        return Err(io::Error::new(io::ErrorKind::Other, "Janela não encontrada"));
-    }
+    let selected_hunt = config.hunts[hunt_choice].clone();
+    let hp_regen_passive = config.combat.hp_regen_passive.clone();
+    let mana_regen_passive = config.combat.mana_regen_passive.clone();
+    let hp_to_defense_light = config.combat.hp_to_defense_light.clone();
+    let hp_to_defense_full = config.combat.hp_to_defense_full.clone();
+    let combat_basic = config.skills.basic.clone();
+    let combat_start = config.skills.start.clone();
+    let combat_combo = config.skills.combo.clone();
+    let combat_defense_light = config.skills.defense_light.clone();
+    let combat_defense_full = config.skills.defense_full.clone();
+    let global_cd = config.combat.global_cd.clone();
 
     let running = Arc::new(AtomicBool::new(true));
     let r = running.clone();
@@ -206,54 +256,36 @@ async fn hunting() -> io::Result<()> {
         r.store(false, Ordering::SeqCst);
     }).expect("Erro ao definir o manipulador de Ctrl-C");
 
-    while running.load(Ordering::SeqCst) {
-        for path in selected_hunt.route.iter() {
-            combat_instance(window_info.hwnd, hp_regen_passive, mana_regen_passive, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_start, combat_combo, combat_basic, *global_cd);
-            println!("Para onde está indo: {:?}", path);
-            path_walker(window_info.hwnd, *path, hp_regen_passive, mana_regen_passive, hp_to_defense_light, hp_to_defense_full, combat_basic, combat_start, combat_combo, combat_defense_light, combat_defense_full, *global_cd);
+    let food_task = task::spawn(run_timer_for_foods(config.foods.clone(), running.clone()));
+    let hunting_task = task::spawn(async move {
+        while running.load(Ordering::SeqCst) {
+            for path in selected_hunt.route.iter() {
+                combat_instance(unsafe { WINDOW_HANDLE }, &hp_regen_passive, &mana_regen_passive, &hp_to_defense_light, &hp_to_defense_full, &combat_defense_light, &combat_defense_full, &combat_start, &combat_combo, &combat_basic, global_cd);
+                println!("Going to: {:?}", path);
+                path_walker(unsafe { WINDOW_HANDLE }, *path, &hp_regen_passive, &mana_regen_passive, &hp_to_defense_light, &hp_to_defense_full, &combat_basic, &combat_start, &combat_combo, &combat_defense_light, &combat_defense_full, global_cd);
+            }
         }
-    }
+    });
 
+    let _ = food_task.await?;
+    let _ = hunting_task.await?;
+    
     Ok(())
 }
 
 #[tokio::main]
-async fn only_combat() -> io::Result<()> {
+async fn only_combat(config: Config) -> io::Result<()> {
 
-    let config = read_config();
-
-    let hp_regen_passive = &config.combat.hp_regen_passive;
-    let mana_regen_passive = &config.combat.mana_regen_passive;
-    let hp_to_defense_light = &config.combat.hp_to_defense_light;
-    let hp_to_defense_full = &config.combat.hp_to_defense_full;
-    let combat_basic = &config.skills.basic;
-    let combat_start = &config.skills.start;
-    let combat_combo = &config.skills.combo;
-    let combat_defense_light = &config.skills.defense_light;
-    let combat_defense_full = &config.skills.defense_full;
-    let global_cd = &config.combat.global_cd;
-
-    let (_base_address, process_id) = match get_base_address() {
-        Some(data) => data,
-        None => {
-            eprintln!("Erro ao encontrar o endereço base do módulo");
-            return Err(io::Error::new(io::ErrorKind::Other, "Erro ao encontrar o endereço base do módulo"));
-        }
-    };
-
-    let mut window_info = WindowInfo {
-        game_p_id: process_id,
-        hwnd: ptr::null_mut(),
-    };
-
-    unsafe {
-        EnumWindows(Some(enum_windows_callback), &mut window_info as *mut _ as LPARAM);
-    }
-    
-    if window_info.hwnd.is_null() {
-        eprintln!("Janela não encontrada");
-        return Err(io::Error::new(io::ErrorKind::Other, "Janela não encontrada"));
-    }
+    let hp_regen_passive = config.combat.hp_regen_passive.clone();
+    let mana_regen_passive = config.combat.mana_regen_passive.clone();
+    let hp_to_defense_light = config.combat.hp_to_defense_light.clone();
+    let hp_to_defense_full = config.combat.hp_to_defense_full.clone();
+    let combat_basic = config.skills.basic.clone();
+    let combat_start = config.skills.start.clone();
+    let combat_combo = config.skills.combo.clone();
+    let combat_defense_light = config.skills.defense_light.clone();
+    let combat_defense_full = config.skills.defense_full.clone();
+    let global_cd = config.combat.global_cd.clone();
 
     let running = Arc::new(AtomicBool::new(true));
     let r = running.clone();
@@ -262,10 +294,14 @@ async fn only_combat() -> io::Result<()> {
         r.store(false, Ordering::SeqCst);
     }).expect("Erro ao definir o manipulador de Ctrl-C");
 
-    while running.load(Ordering::SeqCst) {
-        println!("Iniciando apenas combate. Walk apenas manual.");
-        combat_instance(window_info.hwnd, hp_regen_passive, mana_regen_passive, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_start, combat_combo, combat_basic, *global_cd);
-    }
+    let hunting_task = task::spawn(async move {
+        println!("Starting only combate. Manual walk.");
+        while running.load(Ordering::SeqCst) {
+            combat_instance(unsafe { WINDOW_HANDLE }, &hp_regen_passive, &mana_regen_passive, &hp_to_defense_light, &hp_to_defense_full, &combat_defense_light, &combat_defense_full, &combat_start, &combat_combo, &combat_basic, global_cd);
+        }
+    });
+
+    let _ = hunting_task.await?;
 
     Ok(())
 }
