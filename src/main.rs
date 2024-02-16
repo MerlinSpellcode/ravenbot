@@ -34,7 +34,7 @@ use std::time::Duration;
 use tokio::{time::interval, task};
 
 use chrono::{Local, Timelike};
-use log::{info, warn, error};
+use log::{info, error};
 use env_logger::Env;
 
 struct WindowInfo {

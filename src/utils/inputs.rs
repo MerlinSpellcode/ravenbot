@@ -38,21 +38,21 @@ pub fn press_tab(hwnd: HWND) {
 pub fn press_skill(hwnd: HWND, skill: &str) {
     let hotkey = HOTKEYS.get(skill).expect("Hotkey not found");
     unsafe { PostMessageA(hwnd, WM_KEYDOWN, *hotkey as usize, 0); }
-    thread::sleep(Duration::from_millis(100));
+    thread::sleep(Duration::from_millis(150));
     unsafe { PostMessageA(hwnd, WM_KEYUP, *hotkey as usize, 0); }
-    thread::sleep(Duration::from_millis(100));
+    thread::sleep(Duration::from_millis(150));
 }
 
 pub fn double_press_skill(hwnd: HWND, skill: &str){
     let hotkey = HOTKEYS.get(skill).expect("Hotkey not found");
     unsafe { PostMessageA(hwnd, WM_KEYDOWN, *hotkey as usize, 0); }
-    thread::sleep(Duration::from_millis(100));
+    thread::sleep(Duration::from_millis(150));
     unsafe { PostMessageA(hwnd, WM_KEYUP, *hotkey as usize, 0); }
-    thread::sleep(Duration::from_millis(100));
+    thread::sleep(Duration::from_millis(150));
     unsafe { PostMessageA(hwnd, WM_KEYDOWN, *hotkey as usize, 0); }
-    thread::sleep(Duration::from_millis(100));
+    thread::sleep(Duration::from_millis(150));
     unsafe { PostMessageA(hwnd, WM_KEYUP, *hotkey as usize, 0); }
-    thread::sleep(Duration::from_millis(100));
+    thread::sleep(Duration::from_millis(150));
 }
 
 // pub fn spam_press_skill(hwnd: HWND, skill: &str) {

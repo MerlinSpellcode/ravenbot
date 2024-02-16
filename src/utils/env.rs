@@ -111,7 +111,18 @@ pub struct Skill {
     pub cooldown: u64,
     pub name: String,
     pub is_area: bool,
-    pub prereq: String,
+    pub prereq: Prereq,
+    pub has_global: bool
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
+pub struct Prereq {
+    pub hotkey: String,
+    pub mana: u32,
+    pub aether: bool,
+    pub cooldown: u64,
+    pub name: String,
+    pub is_area: bool,
     pub has_global: bool
 }
 
@@ -121,7 +132,6 @@ pub struct Food {
     pub duration: u64,
     pub name: String,
 }
-
 pub struct Buffs {
     pub food: Vec<Food>,
 }

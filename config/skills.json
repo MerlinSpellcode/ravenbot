@@ -7,191 +7,263 @@
     }
   ],
   "start": [
-      {
+    {
+      "hotkey": "Z",
+      "mana": 80,
+      "aether": false,
+      "cooldown": 15,
+      "name": "Leech",
+      "is_area": false,
+      "prereq": {
+        "hotkey": "",
+        "mana": 0,
+        "aether": false,
+        "cooldown": 0,
+        "name": "",
+        "is_area": false,
+        "has_global": false
+      },
+      "has_global": true
+    },
+    {
+      "hotkey": "Q",
+      "mana": 33,
+      "aether": false,
+      "cooldown": 15,
+      "name": "Curse",
+      "is_area": false,
+      "prereq": {
+        "hotkey": "",
+        "mana": 0,
+        "aether": false,
+        "cooldown": 0,
+        "name": "",
+        "is_area": false,
+        "has_global": false
+      },
+      "has_global": true
+    },
+    {
+      "hotkey": "F2",
+      "mana": 66,
+      "aether": true,
+      "cooldown": 15,
+      "name": "Frost Shards",
+      "is_area": false,
+      "prereq": {
+        "hotkey": "",
+        "mana": 0,
+        "aether": false,
+        "cooldown": 0,
+        "name": "",
+        "is_area": false,
+        "has_global": false
+      },
+      "has_global": true
+    }
+  ],
+  "combo": [
+    {
+      "hotkey": "F1",
+      "mana": 195,
+      "aether": true,
+      "cooldown": 35,
+      "name": "Pyroblast",
+      "is_area": false,
+      "prereq": {
+        "hotkey": "",
+        "mana": 0,
+        "aether": false,
+        "cooldown": 0,
+        "name": "",
+        "is_area": false,
+        "has_global": false
+      },
+      "has_global": true
+    },
+    {
+      "hotkey": "R",
+      "mana": 64,
+      "aether": true,
+      "cooldown": 20,
+      "name": "Arcane Torrent",
+      "is_area": false,
+      "prereq": {
+        "hotkey": "2",
+        "mana": 258,
+        "aether": true,
+        "cooldown": 60,
+        "name": "Mirror Image",
+        "is_area": false,
+        "has_global": true
+      },
+      "has_global": true
+    },
+    {
+      "hotkey": "F5",
+      "mana": 83,
+      "aether": true,
+      "cooldown": 20,
+      "name": "Frost Lance",
+      "is_area": false,
+      "prereq": {
+        "hotkey": "",
+        "mana": 0,
+        "aether": false,
+        "cooldown": 0,
+        "name": "",
+        "is_area": false,
+        "has_global": false
+      },
+      "has_global": true
+    },
+    {
+      "hotkey": "F3",
+      "mana": 199,
+      "aether": true,
+      "cooldown": 60,
+      "name": "Death Pulse",
+      "is_area": false,
+      "prereq": {
         "hotkey": "Q",
         "mana": 33,
         "aether": false,
         "cooldown": 15,
         "name": "Curse",
         "is_area": false,
-        "prereq": "",
         "has_global": true
       },
-      {
-        "hotkey": "Z",
-        "mana": 80,
+      "has_global": true
+    },
+    {
+      "hotkey": "1",
+      "mana": 101,
+      "aether": true,
+      "cooldown": 45,
+      "name": "Flame Tornado",
+      "is_area": true,
+      "prereq": {
+        "hotkey": "",
+        "mana": 0,
         "aether": false,
-        "cooldown": 15,
-        "name": "Leech",
+        "cooldown": 0,
+        "name": "",
         "is_area": false,
-        "prereq": "",
-        "has_global": true
+        "has_global": false
       },
-      {
-        "hotkey": "C",
-        "mana": 112,
+      "has_global": true
+    },
+    {
+      "hotkey": "2",
+      "mana": 258,
+      "aether": true,
+      "cooldown": 60,
+      "name": "Mirror Image",
+      "is_area": false,
+      "prereq": {
+        "hotkey": "",
+        "mana": 0,
         "aether": false,
-        "cooldown": 30,
-        "name": "Magic Rupture",
+        "cooldown": 0,
+        "name": "",
         "is_area": false,
-        "prereq": "",
-        "has_global": true
+        "has_global": false
       },
-      {
+      "has_global": true
+    }
+  ],
+  "defense_light": [
+    {
+      "hotkey": "F6",
+      "mana": 120,
+      "aether": false,
+      "cooldown": 30,
+      "name": "Eternal Worms",
+      "is_area": false,
+      "prereq": {
         "hotkey": "F4",
-        "mana": 49,
+        "mana": 51,
         "aether": true,
         "cooldown": 15,
         "name": "Erupt",
         "is_area": false,
-        "prereq": "",
         "has_global": true
       },
-      {
-        "hotkey": "5",
-        "mana": 192,
-        "aether": false,
-        "cooldown": 60,
-        "name": "Shackles Of Pain",
-        "is_area": false,
-        "prereq": "",
-        "has_global": false
-      },
-      {
-          "hotkey": "1",
-          "mana": 50,
-          "aether": true,
-          "cooldown": 20,
-          "name": "Viper Arrow",
-          "is_area": false,
-          "prereq": "",
-          "has_global": true
-      }
-  ],
-  "combo": [
-      {
-          "hotkey": "F1",
-          "mana": 195,
-          "aether": true,
-          "cooldown": 35,
-          "name": "Pyroblast",
-          "is_area": false,
-          "prereq": "",
-          "has_global": true
-      },
-      {
-          "hotkey": "4",
-          "mana": 169,
-          "aether": true,
-          "cooldown": 45,
-          "name": "Dragons Arrow",
-          "is_area": false,
-          "prereq": "",
-          "has_global": true
-      },
-      {
-          "hotkey": "F3",
-          "mana": 199,
-          "aether": true,
-          "cooldown": 60,
-          "name": "Death Pulse",
-          "is_area": false,
-          "prereq": "Q",
-          "has_global": true
-      },
-      {
-        "hotkey": "R",
-        "mana": 64,
-        "aether": true,
-        "cooldown": 20,
-        "name": "Arcane Torrent",
-        "is_area": false,
-        "prereq": "",
-        "has_global": true
-      },
-      {
-        "hotkey": "3",
-        "mana": 101,
-        "aether": false,
-        "cooldown": 30,
-        "name": "Dawn Arrow",
-        "is_area": true,
-        "prereq": "",
-        "has_global": true
-      },
-      {
-          "hotkey": "2",
-          "mana": 84,
-          "aether": true,
-          "cooldown": 30,
-          "name": "Precision Shot",
-          "is_area": false,
-          "prereq": "",
-          "has_global": true
-      },
-      {
-          "hotkey": "F5",
-          "mana": 83,
-          "aether": true,
-          "cooldown": 20,
-          "name": "Frost Lance",
-          "is_area": false,
-          "prereq": "",
-          "has_global": true
-      },
-      {
-        "hotkey": "F2",
-        "mana": 66,
-        "aether": true,
-        "cooldown": 15,
-        "name": "Frost Shards",
-        "is_area": false,
-        "prereq": "",
-        "has_global": true
-      }
-  ],
-  "defense_light": [
-      {
-          "hotkey": "F6",
-          "mana": 120,
-          "aether": false,
-          "cooldown": 30,
-          "name": "Eternal Worms",
-          "is_area": false,
-          "prereq": "F4",
-          "has_global": true
-      },
-      {
-        "hotkey": "F11",
+      "has_global": true
+    },
+    {
+      "hotkey": "F11",
+      "mana": 0,
+      "aether": false,
+      "cooldown": 45,
+      "name": "HP Potion",
+      "is_area": false,
+      "prereq": {
+        "hotkey": "",
         "mana": 0,
         "aether": false,
-        "cooldown": 45,
-        "name": "HP Potion",
+        "cooldown": 0,
+        "name": "",
         "is_area": false,
-        "prereq": "",
         "has_global": false
-      }
+      },
+      "has_global": false
+    }
   ],
   "defense_full": [
-      {
-          "hotkey": "F6",
-          "mana": 120,
-          "aether": false,
-          "cooldown": 30,
-          "name": "Eternal Worms",
-          "is_area": false,
-          "prereq": "F4",
-          "has_global": true
-      },
-      {
-        "hotkey": "F11",
+    {
+      "hotkey": "F11",
+      "mana": 0,
+      "aether": false,
+      "cooldown": 45,
+      "name": "HP Potion",
+      "is_area": false,
+      "prereq": {
+        "hotkey": "",
         "mana": 0,
         "aether": false,
-        "cooldown": 45,
-        "name": "HP Potion",
+        "cooldown": 0,
+        "name": "",
         "is_area": false,
-        "prereq": "",
         "has_global": false
-      }
+      },
+      "has_global": false
+    },
+    {
+      "hotkey": "5",
+      "mana": 192,
+      "aether": false,
+      "cooldown": 60,
+      "name": "Shackles Of Pain",
+      "is_area": false,
+      "prereq": {
+        "hotkey": "",
+        "mana": 0,
+        "aether": false,
+        "cooldown": 0,
+        "name": "",
+        "is_area": false,
+        "has_global": false
+      },
+      "has_global": false
+    },
+    {
+      "hotkey": "F6",
+      "mana": 120,
+      "aether": false,
+      "cooldown": 30,
+      "name": "Eternal Worms",
+      "is_area": false,
+      "prereq": {
+        "hotkey": "F4",
+        "mana": 51,
+        "aether": true,
+        "cooldown": 15,
+        "name": "Erupt",
+        "is_area": false,
+        "has_global": true
+      },
+      "has_global": true
+    }
   ]
 }
