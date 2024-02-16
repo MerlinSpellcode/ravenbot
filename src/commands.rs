@@ -1,7 +1,7 @@
 use log::info;
 use winapi::shared::windef::HWND;
 use crate::utils::inputs::{press_w, press_a, press_s, press_d, press_skill, press_tab, double_press_skill};
-use crate::utils::env::{BasicS, Skill};
+use crate::utils::env::{BasicS, Prereq, Skill};
 use crate::checks::{get_aether, hp_need_restore, mana_need_restore, is_hp_full, is_mana_full, get_target, get_coord, get_mana_actual, get_hp_actual};
 
 // use tokio::time::{Duration, Instant};
@@ -89,7 +89,6 @@ pub fn path_walker(hwnd: HWND, destination: [i32; 3], hp_regen_passive: &str, ma
     }
 }
 
-
 fn check_target(hwnd: HWND) -> bool {
     let first_try_get = get_target();
     if first_try_get {
@@ -112,56 +111,16 @@ fn check_target(hwnd: HWND) -> bool {
 }
 
 fn sleep_for_global_cd(skill: &Skill, global_cd: u64){
-    if skill.has_global {
+    if skill.has_global{
         info!("Waiting for Global Cooldown ({}ms).", global_cd);
         std::thread::sleep(std::time::Duration::from_millis(global_cd));
     }
 }
 
-fn start_fight(hwnd: HWND, combat_start: &[Skill], combat_basic: &[BasicS], global_cd: u64) {
-    info!("Begining 'Start' skills rotation.");
-    for skill in combat_start.iter(){
-        if check_target(hwnd){
-            if skill.prereq != "" {
-                info!("Casting hotkey ({}), prereq of {} ({}).", skill.prereq, skill.name, skill.hotkey);
-                press_skill(hwnd, &skill.prereq);
-                sleep_for_global_cd(skill, global_cd);
-            }
-            if skill.aether {
-                if get_aether() > 49.0 {
-                    if skill.is_area {
-                        info!("Casting area skill {} ({}) with {} Aether.", skill.name, skill.hotkey, get_aether());
-                        double_press_skill(hwnd, &skill.hotkey);
-                    } else {
-                        info!("Casting skill {} ({}) with {} Aether.", skill.name, skill.hotkey, get_aether());
-                        press_skill(hwnd, &skill.hotkey);
-                    }
-                    sleep_for_global_cd(skill, global_cd);
-                } else {
-                    generate_aether(hwnd, combat_basic, global_cd);
-                    if skill.is_area {
-                        info!("Casting area skill {} ({}) with {} Aether.", skill.name, skill.hotkey, get_aether());
-                        double_press_skill(hwnd, &skill.hotkey);
-                    } else {
-                        info!("Casting skill {} ({}) with {} Aether.", skill.name, skill.hotkey, get_aether());
-                        press_skill(hwnd, &skill.hotkey);
-                    }
-                    sleep_for_global_cd(skill, global_cd);
-                }
-            } else {
-                if skill.is_area {
-                    info!("Casting area skill {} ({}).", skill.name, skill.hotkey);
-                    double_press_skill(hwnd, &skill.hotkey);
-                } else {
-                    info!("Casting skill {} ({}).", skill.name, skill.hotkey);
-                    press_skill(hwnd, &skill.hotkey);
-                }
-                sleep_for_global_cd(skill, global_cd);
-            }
-        } else {
-            info!("No more targets on sight.");
-            break;
-        }
+fn prereq_sleep_for_global_cd(prereq: &Prereq, global_cd: u64){
+    if prereq.has_global{
+        info!("Waiting for Global Cooldown ({}ms).", global_cd);
+        std::thread::sleep(std::time::Duration::from_millis(global_cd));
     }
 }
 
@@ -179,48 +138,85 @@ fn generate_aether(hwnd: HWND, combat_basic: &[BasicS], global_cd: u64){
     } 
 }
 
-fn defensive_skills(hwnd: HWND, hp_to_defense_light: &str, hp_to_defense_full: &str, combat_defense_light: &[Skill], combat_defense_full: &[Skill], combat_basic: &[BasicS], global_cd: u64){
+fn cast_skill_prereq(hwnd: HWND, skill: &Skill, global_cd: u64, combat_basic: &[BasicS]){
+    if skill.prereq.hotkey != "" {
+        info!("{} ({}) is a prereq of {} ({}).", skill.prereq.name, skill.prereq.hotkey, skill.name, skill.hotkey);
+        if skill.prereq.aether {
+            if get_aether() > 49.0 {
+                if skill.prereq.is_area {
+                    info!("Casting area skill {} ({}) with {} Aether.", skill.prereq.name, skill.prereq.hotkey, get_aether());
+                    double_press_skill(hwnd, &skill.prereq.hotkey);
+                } else {
+                    info!("Casting skill {} ({}) with {} Aether.", skill.prereq.name, skill.prereq.hotkey, get_aether());
+                    press_skill(hwnd, &skill.prereq.hotkey);
+                }
+                prereq_sleep_for_global_cd(&skill.prereq, global_cd);
+            } else {
+                generate_aether(hwnd, combat_basic, global_cd);
+                if skill.prereq.is_area {
+                    info!("Casting area skill {} ({}) with {} Aether.", skill.prereq.name, skill.prereq.hotkey, get_aether());
+                    double_press_skill(hwnd, &skill.prereq.hotkey);
+                } else {
+                    info!("Casting skill {} ({}) with {} Aether.", skill.prereq.name, skill.prereq.hotkey, get_aether());
+                    press_skill(hwnd, &skill.prereq.hotkey);
+                }
+                prereq_sleep_for_global_cd(&skill.prereq, global_cd);
+            }
+        } else {
+            if skill.prereq.is_area {
+                info!("Casting area skill {} ({}).", skill.prereq.name, skill.prereq.hotkey);
+                double_press_skill(hwnd, &skill.prereq.hotkey);
+            } else {
+                info!("Casting skill {} ({}).", skill.prereq.name, skill.prereq.hotkey);
+                press_skill(hwnd, &skill.prereq.hotkey);
+            }
+            prereq_sleep_for_global_cd(&skill.prereq, global_cd);
+        }
+    }
+}
+
+fn cast_skill(hwnd: HWND, skill: &Skill, global_cd: u64, combat_basic: &[BasicS]){
+    if skill.aether {
+        if get_aether() > 49.0 {
+            if skill.is_area {
+                info!("Casting area skill {} ({}) with {} Aether.", skill.name, skill.hotkey, get_aether());
+                double_press_skill(hwnd, &skill.hotkey);
+            } else {
+                info!("Casting skill {} ({}) with {} Aether.", skill.name, skill.hotkey, get_aether());
+                press_skill(hwnd, &skill.hotkey);
+            }
+            sleep_for_global_cd(&skill, global_cd);
+        } else {
+            generate_aether(hwnd, combat_basic, global_cd);
+            if skill.is_area {
+                info!("Casting area skill {} ({}) with {} Aether.", skill.name, skill.hotkey, get_aether());
+                double_press_skill(hwnd, &skill.hotkey);
+            } else {
+                info!("Casting skill {} ({}) with {} Aether.", skill.name, skill.hotkey, get_aether());
+                press_skill(hwnd, &skill.hotkey);
+            }
+            sleep_for_global_cd(&skill, global_cd);
+        }
+    } else {
+        if skill.is_area {
+            info!("Casting area skill {} ({}).", skill.name, skill.hotkey);
+            double_press_skill(hwnd, &skill.hotkey);
+        } else {
+            info!("Casting skill {} ({}).", skill.name, skill.hotkey);
+            press_skill(hwnd, &skill.hotkey);
+        }
+        sleep_for_global_cd(&skill, global_cd);
+    }
+}
+
+fn defensive_skills(hwnd: HWND, hp_to_defense_light: &str, hp_to_defense_full: &str, combat_defense_light:&[Skill], combat_defense_full:&[Skill], combat_basic: &[BasicS], global_cd: u64){
     if hp_need_restore(hp_to_defense_full){
         get_hp_actual();
         info!("HP on critical situation. Starting full defensive skills.");
         for skill in combat_defense_full.iter(){
             if check_target(hwnd){
-                if skill.prereq != "" {
-                    info!("Casting hotkey ({}), prereq of {} ({}).", skill.prereq, skill.name, skill.hotkey);
-                    press_skill(hwnd, &skill.prereq);
-                    sleep_for_global_cd(skill, global_cd);
-                }
-                if skill.aether {
-                    if get_aether() > 49.0 {
-                        if skill.is_area {
-                            info!("Casting area skill {} ({}) with {} Aether.", skill.name, skill.hotkey, get_aether());
-                            double_press_skill(hwnd, &skill.hotkey);
-                        } else {
-                            info!("Casting skill {} ({}) with {} Aether.", skill.name, skill.hotkey, get_aether());
-                            press_skill(hwnd, &skill.hotkey);
-                        }
-                        sleep_for_global_cd(skill, global_cd);
-                    } else {
-                        generate_aether(hwnd, combat_basic, global_cd);
-                        if skill.is_area {
-                            info!("Casting area skill {} ({}) with {} Aether.", skill.name, skill.hotkey, get_aether());
-                            double_press_skill(hwnd, &skill.hotkey);
-                        } else {
-                            info!("Casting skill {} ({}) with {} Aether.", skill.name, skill.hotkey, get_aether());
-                            press_skill(hwnd, &skill.hotkey);
-                        }
-                        sleep_for_global_cd(skill, global_cd);
-                    }
-                } else {
-                    if skill.is_area {
-                        info!("Casting area skill {} ({}).", skill.name, skill.hotkey);
-                        double_press_skill(hwnd, &skill.hotkey);
-                    } else {
-                        info!("Casting skill {} ({}).", skill.name, skill.hotkey);
-                        press_skill(hwnd, &skill.hotkey);
-                    }
-                    sleep_for_global_cd(skill, global_cd);
-                }
+                cast_skill_prereq(hwnd, skill, global_cd, combat_basic);
+                cast_skill(hwnd, skill, global_cd, combat_basic);
             } else {
                 info!("No more targets on sight.");
                 break;
@@ -231,46 +227,26 @@ fn defensive_skills(hwnd: HWND, hp_to_defense_light: &str, hp_to_defense_full: &
         info!("HP on hard situation. Starting light defensive skills.");
         for skill in combat_defense_light.iter(){
             if check_target(hwnd){
-                if skill.prereq != "" {
-                    info!("Casting hotkey ({}), prereq of {} ({}).", skill.prereq, skill.name, skill.hotkey);
-                    press_skill(hwnd, &skill.prereq);
-                    sleep_for_global_cd(skill, global_cd);
-                }
-                if skill.aether {
-                    if get_aether() > 49.0 {
-                        if skill.is_area {
-                            info!("Casting area skill {} ({}) with {} Aether.", skill.name, skill.hotkey, get_aether());
-                            double_press_skill(hwnd, &skill.hotkey);
-                        } else {
-                            info!("Casting skill {} ({}) with {} Aether.", skill.name, skill.hotkey, get_aether());
-                            press_skill(hwnd, &skill.hotkey);
-                        }
-                        sleep_for_global_cd(skill, global_cd);
-                    } else {
-                        generate_aether(hwnd, combat_basic, global_cd);
-                        if skill.is_area {
-                            info!("Casting area skill {} ({}) with {} Aether.", skill.name, skill.hotkey, get_aether());
-                            double_press_skill(hwnd, &skill.hotkey);
-                        } else {
-                            info!("Casting skill {} ({}) with {} Aether.", skill.name, skill.hotkey, get_aether());
-                            press_skill(hwnd, &skill.hotkey);
-                        }
-                        sleep_for_global_cd(skill, global_cd);
-                    }
-                } else {
-                    if skill.is_area {
-                        info!("Casting area skill {} ({}).", skill.name, skill.hotkey);
-                        double_press_skill(hwnd, &skill.hotkey);
-                    } else {
-                        info!("Casting skill {} ({}).", skill.name, skill.hotkey);
-                        press_skill(hwnd, &skill.hotkey);
-                    }
-                    sleep_for_global_cd(skill, global_cd);
-                }
+                cast_skill_prereq(hwnd, skill, global_cd, combat_basic);
+                cast_skill(hwnd, skill, global_cd, combat_basic);
             } else {
                 info!("No more targets on sight.");
                 break;
             }
+        }
+    }
+}
+
+fn start_fight(hwnd: HWND, hp_to_defense_light: &str, hp_to_defense_full: &str, combat_defense_light:&[Skill], combat_defense_full:&[Skill], combat_basic: &[BasicS], global_cd: u64, combat_start: &[Skill]){
+    info!("Begining 'Start' skills rotation.");
+    for skill in combat_start.iter(){
+        defensive_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_basic, global_cd);
+        if check_target(hwnd){
+            cast_skill_prereq(hwnd, skill, global_cd, combat_basic);
+            cast_skill(hwnd, skill, global_cd, combat_basic);
+        } else {
+            info!("No more targets on sight.");
+            break;
         }
     }
 }
@@ -280,46 +256,8 @@ fn combo_skills(hwnd: HWND, hp_to_defense_light: &str, hp_to_defense_full: &str,
     for skill in combat_combo.iter(){
         if check_target(hwnd){
             defensive_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_basic, global_cd);
-            if skill.prereq != "" {
-                info!("Casting hotkey ({}), prereq of {} ({}).", skill.prereq, skill.name, skill.hotkey);
-                press_skill(hwnd, &skill.prereq);
-                sleep_for_global_cd(skill, global_cd);
-            }
-            if skill.aether {
-                if get_aether() > 49.0 {
-                    if check_target(hwnd) {
-                        if skill.is_area {
-                            info!("Casting area skill {} ({}) with {} Aether.", skill.name, skill.hotkey, get_aether());
-                            double_press_skill(hwnd, &skill.hotkey);
-                        } else {
-                            info!("Casting skill {} ({}) with {} Aether.", skill.name, skill.hotkey, get_aether());
-                            press_skill(hwnd, &skill.hotkey);
-                        }
-                        sleep_for_global_cd(skill, global_cd);
-                    } else {
-                        break;
-                    }
-                } else {
-                    generate_aether(hwnd, combat_basic, global_cd);
-                    if skill.is_area {
-                        info!("Casting area skill {} ({}) with {} Aether.", skill.name, skill.hotkey, get_aether());
-                        double_press_skill(hwnd, &skill.hotkey);
-                    } else {
-                        info!("Casting skill {} ({}) with {} Aether.", skill.name, skill.hotkey, get_aether());
-                        press_skill(hwnd, &skill.hotkey);
-                    }
-                    sleep_for_global_cd(skill, global_cd);
-                }
-            } else {
-                std::thread::sleep(std::time::Duration::from_millis(global_cd));
-                if skill.is_area {
-                    info!("Casting area skill {} ({}).", skill.name, skill.hotkey);
-                    double_press_skill(hwnd, &skill.hotkey);
-                } else {
-                    info!("Casting skill {} ({}).", skill.name, skill.hotkey);
-                    press_skill(hwnd, &skill.hotkey);
-                }
-            }
+            cast_skill_prereq(hwnd, skill, global_cd, combat_basic);
+            cast_skill(hwnd, skill, global_cd, combat_basic);
         } else {
             info!("No more targets on sight.");
             break;
@@ -332,8 +270,7 @@ pub fn combat_instance(hwnd: HWND, hp_regen_passive: &str, mana_regen_passive: &
         info!("Target found. Starting FIGHT.");
         std::thread::sleep(std::time::Duration::from_millis(2100));
         defensive_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_basic, global_cd);
-        start_fight(hwnd, combat_start, combat_basic, global_cd);
-        generate_aether(hwnd, combat_basic, global_cd);
+        start_fight(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_basic, global_cd, combat_start);
         combo_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_combo, combat_basic, global_cd);
     }
     

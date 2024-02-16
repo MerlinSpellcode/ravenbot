@@ -34,7 +34,7 @@ use std::time::Duration;
 use tokio::{time::interval, task};
 
 use chrono::{Local, Timelike};
-use log::{info, warn, error};
+use log::{info, error};
 use env_logger::Env;
 
 struct WindowInfo {
@@ -136,8 +136,11 @@ pub fn use_foods(foods: &Foods){
     let current_time = Local::now().with_timezone(&brt);
     info!("Using foods at {:02}:{:02}:{:02} BRT..", current_time.hour(), current_time.minute(), current_time.second());
     press_skill(unsafe { WINDOW_HANDLE }, &foods.status);
+    thread::sleep(Duration::from_millis(100));
     press_skill(unsafe { WINDOW_HANDLE }, &foods.attack_power);
+    thread::sleep(Duration::from_millis(100));
     press_skill(unsafe { WINDOW_HANDLE }, &foods.hp_mana_regen);
+    thread::sleep(Duration::from_millis(100));
 }
 
 fn main_menu() -> io::Result<()> {
