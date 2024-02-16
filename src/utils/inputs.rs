@@ -1,3 +1,4 @@
+use log::warn;
 use winapi::um::winuser::{PostMessageA, WM_KEYDOWN, WM_KEYUP};
 use winapi::shared::windef::HWND;
 use std::thread;
@@ -36,23 +37,53 @@ pub fn press_tab(hwnd: HWND) {
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 // @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 pub fn press_skill(hwnd: HWND, skill: &str) {
-    let hotkey = HOTKEYS.get(skill).expect("Hotkey not found");
-    unsafe { PostMessageA(hwnd, WM_KEYDOWN, *hotkey as usize, 0); }
-    thread::sleep(Duration::from_millis(150));
-    unsafe { PostMessageA(hwnd, WM_KEYUP, *hotkey as usize, 0); }
-    thread::sleep(Duration::from_millis(150));
+    match HOTKEYS.get(skill) {
+        Some(hotkey) => {
+            unsafe { PostMessageA(hwnd, WM_KEYDOWN, *hotkey as usize, 0); }
+            thread::sleep(Duration::from_millis(100));
+            unsafe { PostMessageA(hwnd, WM_KEYUP, *hotkey as usize, 0); }
+            thread::sleep(Duration::from_millis(100));
+        }
+        None => {
+            warn!("Hotkey not found for hotkey: {}", skill);
+            // Ou você pode retornar um erro e lidar com ele no código que chama essa função:
+            // return Err(format!("Hotkey not found for skill: {}", skill).into());
+        }
+    }
+    // let hotkey = HOTKEYS.get(skill).expect("Hotkey not found");
+    // unsafe { PostMessageA(hwnd, WM_KEYDOWN, *hotkey as usize, 0); }
+    // thread::sleep(Duration::from_millis(100));
+    // unsafe { PostMessageA(hwnd, WM_KEYUP, *hotkey as usize, 0); }
+    // thread::sleep(Duration::from_millis(100));
 }
 
 pub fn double_press_skill(hwnd: HWND, skill: &str){
-    let hotkey = HOTKEYS.get(skill).expect("Hotkey not found");
-    unsafe { PostMessageA(hwnd, WM_KEYDOWN, *hotkey as usize, 0); }
-    thread::sleep(Duration::from_millis(150));
-    unsafe { PostMessageA(hwnd, WM_KEYUP, *hotkey as usize, 0); }
-    thread::sleep(Duration::from_millis(150));
-    unsafe { PostMessageA(hwnd, WM_KEYDOWN, *hotkey as usize, 0); }
-    thread::sleep(Duration::from_millis(150));
-    unsafe { PostMessageA(hwnd, WM_KEYUP, *hotkey as usize, 0); }
-    thread::sleep(Duration::from_millis(150));
+    match HOTKEYS.get(skill) {
+        Some(hotkey) => {
+            unsafe { PostMessageA(hwnd, WM_KEYDOWN, *hotkey as usize, 0); }
+            thread::sleep(Duration::from_millis(100));
+            unsafe { PostMessageA(hwnd, WM_KEYUP, *hotkey as usize, 0); }
+            thread::sleep(Duration::from_millis(200));
+            unsafe { PostMessageA(hwnd, WM_KEYDOWN, *hotkey as usize, 0); }
+            thread::sleep(Duration::from_millis(100));
+            unsafe { PostMessageA(hwnd, WM_KEYUP, *hotkey as usize, 0); }
+            thread::sleep(Duration::from_millis(100));
+        }
+        None => {
+            warn!("Hotkey not found for skill: {}", skill);
+            // Ou você pode retornar um erro e lidar com ele no código que chama essa função:
+            // return Err(format!("Hotkey not found for skill: {}", skill).into());
+        }
+    }
+    // let hotkey = HOTKEYS.get(skill).expect("Hotkey not found");
+    // unsafe { PostMessageA(hwnd, WM_KEYDOWN, *hotkey as usize, 0); }
+    // thread::sleep(Duration::from_millis(100));
+    // unsafe { PostMessageA(hwnd, WM_KEYUP, *hotkey as usize, 0); }
+    // thread::sleep(Duration::from_millis(200));
+    // unsafe { PostMessageA(hwnd, WM_KEYDOWN, *hotkey as usize, 0); }
+    // thread::sleep(Duration::from_millis(100));
+    // unsafe { PostMessageA(hwnd, WM_KEYUP, *hotkey as usize, 0); }
+    // thread::sleep(Duration::from_millis(100));
 }
 
 // pub fn spam_press_skill(hwnd: HWND, skill: &str) {
