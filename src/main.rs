@@ -34,6 +34,8 @@ use std::time::Duration;
 use tokio::{time::interval, task};
 
 use chrono::{Local, Timelike};
+use log::{info, warn, error};
+use env_logger::Env;
 
 struct WindowInfo {
     game_p_id: DWORD,
@@ -48,7 +50,7 @@ fn get_window_handle() -> Result<HWND, io::Error> {
     let (_base_address, process_id) = match get_base_address() {
         Some(data) => data,
         None => {
-            eprintln!("Erro ao encontrar o endereço base do módulo");
+            error!("Erro ao encontrar o endereço base do módulo");
             return Err(io::Error::new(io::ErrorKind::Other, "Erro ao encontrar o endereço base do módulo"));
         }
     };
@@ -63,7 +65,7 @@ fn get_window_handle() -> Result<HWND, io::Error> {
     }
     
     if window_info.hwnd.is_null() {
-        eprintln!("Janela não encontrada");
+        error!("Janela não encontrada");
         return Err(io::Error::new(io::ErrorKind::Other, "Janela não encontrada"));
     } else { 
         unsafe { WINDOW_HANDLE = window_info.hwnd }
@@ -89,7 +91,7 @@ async fn run_timer_for_foods(foods: Foods, running: Arc<AtomicBool>) {
     let _hwnd = match get_window_handle() {
         Ok(hwnd) => hwnd,
         Err(err) => {
-            eprintln!("Failed to get window handle: {}", err);
+            error!("Failed to get window handle: {}", err);
             running.store(false, Ordering::SeqCst);
             return;
         }
@@ -132,7 +134,7 @@ fn read_config() -> Config {
 pub fn use_foods(foods: &Foods){
     let brt = chrono::FixedOffset::west_opt(3 * 3600).unwrap(); // Horário de Brasília (UTC-3)
     let current_time = Local::now().with_timezone(&brt);
-    println!("Using foods at {:02}:{:02}:{:02} BRT..", current_time.hour(), current_time.minute(), current_time.second());
+    info!("Using foods at {:02}:{:02}:{:02} BRT..", current_time.hour(), current_time.minute(), current_time.second());
     press_skill(unsafe { WINDOW_HANDLE }, &foods.status);
     press_skill(unsafe { WINDOW_HANDLE }, &foods.attack_power);
     press_skill(unsafe { WINDOW_HANDLE }, &foods.hp_mana_regen);
@@ -193,7 +195,7 @@ fn create_hunting_coordinates() -> io::Result<()> {
         unsafe {
             if GetAsyncKeyState(VK_F1 as i32) as u16 & 0x8000 != 0 {
                 let current_value = get_coord(); // Supondo que isso retorna um [i32; 3]
-                println!("Coordenada adicionada: {:?}", current_value);
+                info!("Coordenada adicionada: {:?}", current_value);
     
                 // Atualize a rota diretamente sem manter um empréstimo mutável longo
                 if let Some(_hunt) = config.hunts.iter_mut().find(|h| h.name == nome) {
@@ -260,7 +262,7 @@ async fn hunting(config: Config) -> io::Result<()> {
         while running.load(Ordering::SeqCst) {
             for path in selected_hunt.route.iter() {
                 combat_instance(unsafe { WINDOW_HANDLE }, &hp_regen_passive, &mana_regen_passive, &hp_to_defense_light, &hp_to_defense_full, &combat_defense_light, &combat_defense_full, &combat_start, &combat_combo, &combat_basic, global_cd);
-                println!("Going to: {:?}", path);
+                info!("Going to: {:?}", path);
                 path_walker(unsafe { WINDOW_HANDLE }, *path, &hp_regen_passive, &mana_regen_passive, &hp_to_defense_light, &hp_to_defense_full, &combat_basic, &combat_start, &combat_combo, &combat_defense_light, &combat_defense_full, global_cd);
             }
         }
@@ -294,7 +296,7 @@ async fn only_combat(config: Config) -> io::Result<()> {
     }).expect("Erro ao definir o manipulador de Ctrl-C");
 
     let hunting_task = task::spawn(async move {
-        println!("Starting only combate. Manual walk.");
+        info!("Starting only combate. Manual walk.");
         while running.load(Ordering::SeqCst) {
             combat_instance(unsafe { WINDOW_HANDLE }, &hp_regen_passive, &mana_regen_passive, &hp_to_defense_light, &hp_to_defense_full, &combat_defense_light, &combat_defense_full, &combat_start, &combat_combo, &combat_basic, global_cd);
         }
@@ -306,8 +308,9 @@ async fn only_combat(config: Config) -> io::Result<()> {
 }
 
 fn main() {
+    env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
     if !check_hwid() {
-        println!("HWID não corresponde ao proprietário do bot.");
+        error!("HWID não corresponde ao proprietário do bot.");
         process::exit(1); // Encerra o programa com um código de status 1
     } else {
         main_menu().expect("Erro ao executar o menu principal");

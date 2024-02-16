@@ -1,4 +1,6 @@
 
+use log::info;
+
 use crate::utils::env::{decode_hwid, decode_mempath, MANA_CURRENT, MANA_MAX, HP_CURRENT, HP_MAX, AETHER, TARGET_CHECK, P_X, P_Y, P_Z};
 use crate::utils::address::{get_double_value_from_pointer_chain, get_value_memory};
 use std::process::Command;
@@ -42,13 +44,13 @@ pub fn get_mana_current() -> f64 {
 pub fn get_mana_actual() {
     let mana_current = get_mana_current();
     let mana_max = get_mana_max();
-    println!("Mana: {}/{}", mana_current, mana_max);
+    info!("Mana: {}/{}", mana_current, mana_max);
 }
 
 pub fn get_hp_actual() {
     let hp_current = get_hp_current();
     let hp_max = get_hp_max();
-    println!("HP: {}/{}", hp_current, hp_max);
+    info!("HP: {}/{}", hp_current, hp_max);
 }
 
 pub fn mana_need_restore(value_percent: &str) -> bool {

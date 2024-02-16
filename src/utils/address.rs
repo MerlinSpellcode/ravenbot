@@ -1,3 +1,4 @@
+use log::error;
 use winapi::um::processthreadsapi::OpenProcess;
 use winapi::um::psapi::{EnumProcessModules, GetModuleInformation, MODULEINFO};
 use winapi::um::winnt::PROCESS_ALL_ACCESS;
@@ -81,14 +82,14 @@ pub fn get_value_memory(atr_get: [usize; 2]) -> i32 {
     let (base_address, process_id) = match get_base_address() {
         Some(data) => data,
         None => {
-            eprintln!("Erro ao encontrar o endereço base do módulo");
+            error!("Erro ao encontrar o endereço base do módulo");
             return -1;
         }
     };
 
     let process_handle = unsafe { OpenProcess(PROCESS_ALL_ACCESS, 0, process_id) };
     if process_handle.is_null() {
-        eprintln!("Erro ao abrir o processo (HP)");
+        error!("Erro ao abrir o processo (HP)");
         return -1;
     }
 
@@ -118,7 +119,7 @@ pub fn get_value_memory(atr_get: [usize; 2]) -> i32 {
     };
 
     let return_value = if result == 0 {
-        eprintln!("Erro ao ler a memória do HP");
+        error!("Erro ao ler a memória do HP");
         -1
     } else {
         value as i32
@@ -132,14 +133,14 @@ pub fn get_double_value_from_pointer_chain(base_offsets: &[usize]) -> f64 {
     let (base_address, process_id) = match get_base_address() {
         Some(data) => data,
         None => {
-            eprintln!("Erro ao encontrar o endereço base do módulo");
+            error!("Erro ao encontrar o endereço base do módulo");
             return -1.0;
         }
     };
 
     let process_handle = unsafe { OpenProcess(PROCESS_ALL_ACCESS, 0, process_id) };
     if process_handle.is_null() {
-        eprintln!("Erro ao abrir o processo");
+        error!("Erro ao abrir o processo");
         return -1.0;
     }
 
@@ -172,7 +173,7 @@ pub fn get_double_value_from_pointer_chain(base_offsets: &[usize]) -> f64 {
     };
 
     let return_value = if result == 0 {
-        eprintln!("Erro ao ler a memória");
+        error!("Erro ao ler a memória");
         -1.0
     } else {
         value
