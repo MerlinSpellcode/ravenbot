@@ -5,6 +5,7 @@ extern crate serde_json;
 use std::fs;
 use std::process;
 use std::io::{self, Write};
+use ravenbot::commands::only_walk_path_walker;
 use winapi::um::winuser::{GetAsyncKeyState, VK_F1};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -15,18 +16,18 @@ use winapi::{
 };
 use std::ptr;
 use std::thread;
-// use std::time::Duration;
 
 use ravenbot::utils::address::get_base_address;
 use ravenbot::utils::env::Config;
 use ravenbot::utils::env::Hunt;
+use ravenbot::utils::env::Walk;
 use ravenbot::utils::env::Skills;
 use ravenbot::utils::env::Combat;
 use ravenbot::utils::env::Foods;
 use ravenbot::utils::inputs::press_skill;
-use ravenbot::commands::combat_instance;
-use ravenbot::commands::path_walker;
-// use ravenbot::commands::use_foods;
+use ravenbot::commands::hunting_instance;
+use ravenbot::commands::only_combat_instance;
+use ravenbot::commands::hunting_path_walker;
 use ravenbot::checks::get_coord;
 use ravenbot::checks::check_hwid;
 
@@ -105,6 +106,27 @@ async fn run_timer_for_foods(foods: Foods, running: Arc<AtomicBool>) {
     }
 }
 
+async fn run_timer_general(running: Arc<AtomicBool>) {
+    let _hwnd = match get_window_handle() {
+        Ok(hwnd) => hwnd,
+        Err(err) => {
+            error!("Failed to get window handle: {}", err);
+            running.store(false, Ordering::SeqCst);
+            return;
+        }
+    };
+
+    let mut count = 0; // Move a variável count para fora do loop para mantê-la entre as iterações
+
+    let mut interval = interval(Duration::from_secs(1 * 60));
+
+    while running.load(Ordering::SeqCst) {
+        interval.tick().await;
+        info!("You are playing for {} hours.", count);
+        count += 1; // Incrementa o contador em cada iteração do loop
+    }
+}
+
 fn read_config() -> Config {
 
     let config_combat: Combat = serde_json::from_str(&fs::read_to_string("config/combat.json")
@@ -116,6 +138,9 @@ fn read_config() -> Config {
     let config_hunts: Vec<Hunt> = serde_json::from_str(&fs::read_to_string("config/hunts.json")
         .expect("Erro ao ler o arquivo hunts.json"))
         .expect("Erro ao deserializar o arquivo hunts.json");
+    let config_walks: Vec<Walk> = serde_json::from_str(&fs::read_to_string("config/walks.json")
+        .expect("Erro ao ler o arquivo walks.json"))
+        .expect("Erro ao deserializar o arquivo walks.json");
     let config_foods: Foods = serde_json::from_str(&fs::read_to_string("config/foods.json")
         .expect("Erro ao ler o arquivo foods.json"))
         .expect("Erro ao deserializar o arquivo foods.json");
@@ -124,7 +149,8 @@ fn read_config() -> Config {
         hunts: config_hunts,
         combat: config_combat,
         skills: config_skills,
-        foods: config_foods
+        foods: config_foods,
+        walks: config_walks
     };
 
 
@@ -151,6 +177,8 @@ fn main_menu() -> io::Result<()> {
     println!("1: Create Hunting Coordinates");
     println!("2: Hunting");
     println!("3: Only Combat (Manual Walk)");
+    println!("4: Create Walk Coordinates");
+    println!("5: Only Walk (No Combat)");
 
     let mut choice = String::new();
     io::stdin().read_line(&mut choice)?;
@@ -159,10 +187,12 @@ fn main_menu() -> io::Result<()> {
         "1" => create_hunting_coordinates(),
         "2" => hunting(config),
         "3" => only_combat(config),
+        "4" => create_walk_coordinates(),
+        "5" => only_walk(config),
         _ => {
             println!("Opção inválida, por favor, tente novamente.");
             main_menu()
-        },
+        }
     }
 
 }
@@ -219,6 +249,58 @@ fn create_hunting_coordinates() -> io::Result<()> {
     Ok(())
 }
 
+fn create_walk_coordinates() -> io::Result<()> {
+    let running = Arc::new(AtomicBool::new(true));
+    let r = running.clone();
+
+    ctrlc::set_handler(move || {
+        r.store(false, Ordering::SeqCst);
+    }).expect("Erro ao definir o manipulador de Ctrl-C");
+
+    print!("Digite o nome da sua walk: ");
+    io::stdout().flush().unwrap();
+    let mut nome = String::new();
+    io::stdin().read_line(&mut nome).expect("Falha ao ler a entrada");
+    let nome = nome.trim().to_string();
+
+    let file_path = "config/walks.json";
+    let mut config = read_config();
+
+    // Verifica se já existe uma walk com o nome fornecido, se não, adiciona uma nova
+    let walk_index = config.walks.iter().position(|w| w.name == nome);
+    let _walk = match walk_index {
+        Some(index) => &mut config.walks[index],
+        None => {
+            config.walks.push(Walk { name: nome.clone(), route: Vec::new() });
+            config.walks.last_mut().unwrap()
+        },
+    };
+
+    while running.load(Ordering::SeqCst) {
+        unsafe {
+            if GetAsyncKeyState(VK_F1 as i32) as u16 & 0x8000 != 0 {
+                let current_value = get_coord(); // Supondo que isso retorna um [i32; 3]
+                info!("Coordenada adicionada: {:?}", current_value);
+    
+                // Atualize a rota diretamente sem manter um empréstimo mutável longo
+                if let Some(_walk) = config.walks.iter_mut().find(|w| w.name == nome) {
+                    _walk.route.push(current_value);
+                } else {
+                    config.walks.push(Walk { name: nome.clone(), route: vec![current_value] });
+                }
+    
+                // Agora que as modificações foram feitas, podemos serializar
+                let json_string = serde_json::to_string_pretty(&config.walks).expect("Falha ao serializar JSON");
+                fs::write(file_path, json_string.as_bytes()).expect("Falha ao escrever no arquivo");
+    
+                thread::sleep(Duration::from_secs(1)); // Evita capturas duplicadas
+            }
+        }
+    }
+    
+    Ok(())
+}
+
 fn choose_hunt(hunts: &[Hunt]) -> Option<usize> {
     println!("Escolha uma caçada:");
     for (index, hunt) in hunts.iter().enumerate() {
@@ -230,6 +312,24 @@ fn choose_hunt(hunts: &[Hunt]) -> Option<usize> {
     if std::io::stdin().read_line(&mut choice).is_ok() {
         match choice.trim().parse::<usize>() {
             Ok(num) if num > 0 && num <= hunts.len() => Some(num - 1),
+            _ => None,
+        }
+    } else {
+        None
+    }
+}
+
+fn choose_walk(walks: &[Walk]) -> Option<usize> {
+    println!("Escolha uma walk:");
+    for (index, walk) in walks.iter().enumerate() {
+        println!("{}: {}", index + 1, walk.name);
+    }
+    println!("Digite o número da walk que deseja escolher:");
+
+    let mut choice = String::new();
+    if std::io::stdin().read_line(&mut choice).is_ok() {
+        match choice.trim().parse::<usize>() {
+            Ok(num) if num > 0 && num <= walks.len() => Some(num - 1),
             _ => None,
         }
     } else {
@@ -264,9 +364,9 @@ async fn hunting(config: Config) -> io::Result<()> {
     let hunting_task = task::spawn(async move {
         while running.load(Ordering::SeqCst) {
             for path in selected_hunt.route.iter() {
-                combat_instance(unsafe { WINDOW_HANDLE }, &hp_regen_passive, &mana_regen_passive, &hp_to_defense_light, &hp_to_defense_full, &combat_defense_light, &combat_defense_full, &combat_start, &combat_combo, &combat_basic, global_cd);
+                hunting_instance(unsafe { WINDOW_HANDLE }, &hp_regen_passive, &mana_regen_passive, &hp_to_defense_light, &hp_to_defense_full, &combat_defense_light, &combat_defense_full, &combat_start, &combat_combo, &combat_basic, global_cd);
                 info!("Going to: {:?}", path);
-                path_walker(unsafe { WINDOW_HANDLE }, *path, &hp_regen_passive, &mana_regen_passive, &hp_to_defense_light, &hp_to_defense_full, &combat_basic, &combat_start, &combat_combo, &combat_defense_light, &combat_defense_full, global_cd);
+                hunting_path_walker(unsafe { WINDOW_HANDLE }, *path, &hp_regen_passive, &mana_regen_passive, &hp_to_defense_light, &hp_to_defense_full, &combat_basic, &combat_start, &combat_combo, &combat_defense_light, &combat_defense_full, global_cd);
             }
         }
     });
@@ -278,10 +378,36 @@ async fn hunting(config: Config) -> io::Result<()> {
 }
 
 #[tokio::main]
+async fn only_walk(config: Config) -> io::Result<()> {
+    let walk_choice = choose_walk(&config.walks).expect("Escolha inválida de walk.");
+    let selected_walk = config.walks[walk_choice].clone();
+
+    let running = Arc::new(AtomicBool::new(true));
+    let r = running.clone();
+
+    ctrlc::set_handler(move || {
+        r.store(false, Ordering::SeqCst);
+    }).expect("Erro ao definir o manipulador de Ctrl-C");
+
+    let timer_task = task::spawn(run_timer_general(running.clone()));
+    let walking_task = task::spawn(async move {
+        while running.load(Ordering::SeqCst) {
+            for path in selected_walk.route.iter() {
+                info!("Going to: {:?}", path);
+                only_walk_path_walker(unsafe { WINDOW_HANDLE }, *path);
+            }
+        }
+    });
+
+    let _ = timer_task.await?;
+    let _ = walking_task.await?;
+
+    Ok(())
+}
+
+#[tokio::main]
 async fn only_combat(config: Config) -> io::Result<()> {
 
-    let hp_regen_passive = config.combat.hp_regen_passive.clone();
-    let mana_regen_passive = config.combat.mana_regen_passive.clone();
     let hp_to_defense_light = config.combat.hp_to_defense_light.clone();
     let hp_to_defense_full = config.combat.hp_to_defense_full.clone();
     let combat_basic = config.skills.basic.clone();
@@ -298,13 +424,15 @@ async fn only_combat(config: Config) -> io::Result<()> {
         r.store(false, Ordering::SeqCst);
     }).expect("Erro ao definir o manipulador de Ctrl-C");
 
+    let timer_task = task::spawn(run_timer_general(running.clone()));
     let hunting_task = task::spawn(async move {
-        info!("Starting only combate. Manual walk.");
+        info!("Starting only combat. Manual walk.");
         while running.load(Ordering::SeqCst) {
-            combat_instance(unsafe { WINDOW_HANDLE }, &hp_regen_passive, &mana_regen_passive, &hp_to_defense_light, &hp_to_defense_full, &combat_defense_light, &combat_defense_full, &combat_start, &combat_combo, &combat_basic, global_cd);
+            only_combat_instance(unsafe { WINDOW_HANDLE }, &hp_to_defense_light, &hp_to_defense_full, &combat_defense_light, &combat_defense_full, &combat_start, &combat_combo, &combat_basic, global_cd);
         }
     });
 
+    let _ = timer_task.await?;
     let _ = hunting_task.await?;
 
     Ok(())

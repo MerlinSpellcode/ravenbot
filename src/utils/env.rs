@@ -66,6 +66,7 @@ lazy_static! {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Config {
     pub hunts: Vec<Hunt>,
+    pub walks: Vec<Walk>,
     pub combat: Combat, 
     pub skills: Skills,
     pub foods: Foods
@@ -90,6 +91,12 @@ pub struct Skills {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Hunt {
+    pub name: String,
+    pub route: Vec<[i32; 3]>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Walk {
     pub name: String,
     pub route: Vec<[i32; 3]>,
 }
