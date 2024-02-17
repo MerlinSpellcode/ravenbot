@@ -48,47 +48,6 @@ use crate::checks::{get_aether, hp_need_restore, mana_need_restore, is_hp_full, 
 //     Arc::new(CooldownManagerAsync::new())
 // });
 
-pub fn path_walker(hwnd: HWND, destination: [i32; 3], hp_regen_passive: &str, mana_regen_passive: &str, hp_to_defense_light: &str, hp_to_defense_full: &str, combat_basic: &[BasicS], combat_start: &[Skill], combat_combo: &[Skill], combat_defense_light: &[Skill], combat_defense_full: &[Skill], global_cd: u64) {
-    let mut attempts = 0;
-    let max_attempts = 1000; // Limite para tentativas de movimento para evitar loop infinito
-
-    while attempts < max_attempts {
-        let current = get_coord();
-        
-        // Verifica se o personagem chegou ao destino
-        if current == destination {
-            break;
-        }
-
-        // Tenta mover-se na direção correta
-        if current[0] < destination[0] {
-            press_d(hwnd); // Aumenta X
-        } else if current[0] > destination[0] {
-            press_a(hwnd); // Diminui X
-        }
-
-        if current[1] < destination[1] {
-            press_s(hwnd); // Aumenta Y
-        } else if current[1] > destination[1] {
-            press_w(hwnd); // Diminui Y
-        }
-
-        // Aguarda um curto período antes de tentar novamente
-        std::thread::sleep(std::time::Duration::from_millis(1));
-
-        // Verifica se o personagem se moveu
-        let new_coord = get_coord();
-        if new_coord == current {
-            // O personagem não se moveu, então tenta outro movimento
-            combat_instance(hwnd, hp_regen_passive, mana_regen_passive, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_start, combat_combo, combat_basic, global_cd);
-            attempts += 1;
-        } else {
-            // Reseta as tentativas se houver movimento
-            attempts = 0;
-        }
-    }
-}
-
 fn check_target(hwnd: HWND) -> bool {
     let first_try_get = get_target();
     if first_try_get {
@@ -265,7 +224,87 @@ fn combo_skills(hwnd: HWND, hp_to_defense_light: &str, hp_to_defense_full: &str,
     }
 }
 
-pub fn combat_instance(hwnd: HWND, hp_regen_passive: &str, mana_regen_passive: &str, hp_to_defense_light: &str, hp_to_defense_full: &str, combat_defense_light:&[Skill], combat_defense_full:&[Skill], combat_start: &[Skill], combat_combo: &[Skill], combat_basic: &[BasicS], global_cd: u64) {
+pub fn hunting_path_walker(hwnd: HWND, destination: [i32; 3], hp_regen_passive: &str, mana_regen_passive: &str, hp_to_defense_light: &str, hp_to_defense_full: &str, combat_basic: &[BasicS], combat_start: &[Skill], combat_combo: &[Skill], combat_defense_light: &[Skill], combat_defense_full: &[Skill], global_cd: u64) {
+    let mut attempts = 0;
+    let max_attempts = 1000; // Limite para tentativas de movimento para evitar loop infinito
+
+    while attempts < max_attempts {
+        let current = get_coord();
+        
+        // Verifica se o personagem chegou ao destino
+        if current == destination {
+            break;
+        }
+
+        // Tenta mover-se na direção correta
+        if current[0] < destination[0] {
+            press_d(hwnd); // Aumenta X
+        } else if current[0] > destination[0] {
+            press_a(hwnd); // Diminui X
+        }
+
+        if current[1] < destination[1] {
+            press_s(hwnd); // Aumenta Y
+        } else if current[1] > destination[1] {
+            press_w(hwnd); // Diminui Y
+        }
+
+        // Aguarda um curto período antes de tentar novamente
+        std::thread::sleep(std::time::Duration::from_millis(1));
+
+        // Verifica se o personagem se moveu
+        let new_coord = get_coord();
+        if new_coord == current {
+            // O personagem não se moveu, então tenta outro movimento
+            hunting_instance(hwnd, hp_regen_passive, mana_regen_passive, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_start, combat_combo, combat_basic, global_cd);
+            attempts += 1;
+        } else {
+            // Reseta as tentativas se houver movimento
+            attempts = 0;
+        }
+    }
+}
+
+pub fn only_walk_path_walker(hwnd: HWND, destination: [i32; 3]) {
+    let mut attempts = 0;
+    let max_attempts = 1000; // Limite para tentativas de movimento para evitar loop infinito
+
+    while attempts < max_attempts {
+        let current = get_coord();
+        
+        // Verifica se o personagem chegou ao destino
+        if current == destination {
+            break;
+        }
+
+        // Tenta mover-se na direção correta
+        if current[0] < destination[0] {
+            press_d(hwnd); // Aumenta X
+        } else if current[0] > destination[0] {
+            press_a(hwnd); // Diminui X
+        }
+
+        if current[1] < destination[1] {
+            press_s(hwnd); // Aumenta Y
+        } else if current[1] > destination[1] {
+            press_w(hwnd); // Diminui Y
+        }
+
+        // Aguarda um curto período antes de tentar novamente
+        std::thread::sleep(std::time::Duration::from_millis(1));
+
+        // Verifica se o personagem se moveu
+        let new_coord = get_coord();
+        if new_coord == current {
+            attempts += 1;
+        } else {
+            // Reseta as tentativas se houver movimento
+            attempts = 0;
+        }
+    }
+}
+
+pub fn hunting_instance(hwnd: HWND, hp_regen_passive: &str, mana_regen_passive: &str, hp_to_defense_light: &str, hp_to_defense_full: &str, combat_defense_light:&[Skill], combat_defense_full:&[Skill], combat_start: &[Skill], combat_combo: &[Skill], combat_basic: &[BasicS], global_cd: u64) {
     while check_target(hwnd) {
         info!("Target found. Starting FIGHT.");
         std::thread::sleep(std::time::Duration::from_millis(2100));
@@ -293,6 +332,16 @@ pub fn combat_instance(hwnd: HWND, hp_regen_passive: &str, mana_regen_passive: &
                 break;
             }
         }
+    }
+    return;
+}
+
+pub fn only_combat_instance(hwnd: HWND, hp_to_defense_light: &str, hp_to_defense_full: &str, combat_defense_light:&[Skill], combat_defense_full:&[Skill], combat_start: &[Skill], combat_combo: &[Skill], combat_basic: &[BasicS], global_cd: u64) {
+    while check_target(hwnd) {
+        info!("Target found. Starting FIGHT.");
+        defensive_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_basic, global_cd);
+        start_fight(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_basic, global_cd, combat_start);
+        combo_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_combo, combat_basic, global_cd);
     }
     return;
 }
