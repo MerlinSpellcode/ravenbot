@@ -53,22 +53,47 @@ pub fn get_hp_actual() {
     info!("HP: {}/{}", hp_current, hp_max);
 }
 
-pub fn mana_need_restore(value_percent: &str) -> bool {
-    let mana_current = get_mana_current();
-    let mana_max = get_mana_max();
-    let percent_value = value_percent.trim_end_matches('%').parse::<f64>()
-        .expect("Erro ao converter a porcentagem");
-    let mana_threshold = mana_max * (percent_value / 100.0);
-    mana_current < mana_threshold
+// pub fn mana_need_restore(value_percent: &str) -> bool {
+//     let mana_current = get_mana_current();
+//     let mana_max = get_mana_max();
+//     let percent_value = value_percent.trim_end_matches('%').parse::<f64>()
+//         .expect("Erro ao converter a porcentagem");
+//     let mana_threshold = mana_max * (percent_value / 100.0);
+//     mana_current < mana_threshold
+// }
+
+pub fn hp_need_combat_restore(hp_to_combat_restore: &str) -> bool {
+    // hp_to_combat_restore = 70%
+    let hp_current = get_hp_current(); // ex.: 1500
+    let hp_max = get_hp_max(); // ex.: 2000
+    let percent_value = hp_to_combat_restore.trim_end_matches('%').parse::<f64>()
+        .expect("Erro ao converter a porcentagem de hp_to_combat_restore"); // 70.0
+    let hp_threshold = hp_max * (percent_value / 100.0); // 2000 * (70.0 / 100) = 1400 
+    hp_current < hp_threshold // 1000 < 1400
 }
 
-pub fn hp_need_restore(value_percent: &str) -> bool {
-    let hp_current = get_hp_current();
-    let hp_max = get_hp_max();
-    let percent_value = value_percent.trim_end_matches('%').parse::<f64>()
-        .expect("Erro ao converter a porcentagem");
-    let hp_threshold = hp_max * (percent_value / 100.0);
-    hp_current < hp_threshold
+pub fn hp_need_passive_restore(hp_to_regen_passive: &str, hp_to_continue: &str) -> bool {
+    // hp_to_regen_passive = 70%
+    let hp_current = get_hp_current(); // ex.: 1500
+    let hp_max = get_hp_max(); // ex.: 2000
+    let hp_to_regen_passive_percent_value = hp_to_regen_passive.trim_end_matches('%').parse::<f64>()
+        .expect("Erro ao converter a porcentagem de hp_to_regen_passive"); // 70.0
+    let hp_to_continue_percent_value = hp_to_continue.trim_end_matches('%').parse::<f64>()
+        .expect("Erro ao converter a porcentagem de hp_to_regen_passive"); // 70.0
+    let hp_threshold = hp_max * (hp_to_regen_passive_percent_value / hp_to_continue_percent_value); // 2000 * (70.0 / 80) = 1750
+    hp_current < hp_threshold // 1750 < 1750
+}
+
+pub fn mana_need_passive_restore(mana_to_regen_passive: &str, mana_to_continue: &str) -> bool {
+    // mana_to_regen_passive = 70%
+    let hp_current = get_hp_current(); // ex.: 1500
+    let hp_max = get_hp_max(); // ex.: 2000
+    let mana_to_regen_passive_percent_value = mana_to_regen_passive.trim_end_matches('%').parse::<f64>()
+        .expect("Erro ao converter a porcentagem de mana_to_regen_passive"); // 70.0
+    let mana_to_continue_percent_value = mana_to_continue.trim_end_matches('%').parse::<f64>()
+        .expect("Erro ao converter a porcentagem de mana_to_regen_passive"); // 70.0
+    let hp_threshold = hp_max * (mana_to_regen_passive_percent_value / mana_to_continue_percent_value); // 2000 * (70.0 / 80) = 1750
+    hp_current < hp_threshold // 1750 < 1750
 }
 
 pub fn hp_need_drink(value_percent: &str) -> bool {

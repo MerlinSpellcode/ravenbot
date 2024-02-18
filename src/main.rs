@@ -203,27 +203,31 @@ fn create_hunting_coordinates() -> io::Result<()> {
         r.store(false, Ordering::SeqCst);
     }).expect("Erro ao definir o manipulador de Ctrl-C");
 
-    print!("Digite o nome da sua hunt: ");
-    io::stdout().flush().unwrap();
-    let mut nome = String::new();
-    io::stdin().read_line(&mut nome).expect("Falha ao ler a entrada");
-    let nome = nome.trim().to_string();
-
-    print!("A sua hunt vai ter escadas? ");
-    print!("1: Sim ");
-    print!("0: Não ");
+    println!("A sua hunt vai ter escadas? ");
+    println!("1: Sim ");
+    println!("0: Não ");
     let mut stairs_choice = String::new();
     let mut stairs_bool = false;
     io::stdin().read_line(&mut stairs_choice)?;
-    io::stdout().flush().unwrap();
     match stairs_choice.trim() {
-        "1" => stairs_bool = true,
-        "0" => stairs_bool = false,
+        "1" => { 
+            stairs_bool = true; 
+        },
+        "0" => {
+            stairs_bool = false;
+        }
         _ => {
             println!("Opção inválida, por favor, tente novamente.");
             let _ = create_hunting_coordinates();
         }
     }
+
+    print!("Digite o nome da sua hunt: ");
+    let mut nome = String::new();
+    io::stdout().flush().unwrap();
+
+    io::stdin().read_line(&mut nome).expect("Falha ao ler a entrada");
+    let nome = nome.trim().to_string();
 
     let file_path = "config/hunts.json";
     let mut config = read_config();
@@ -358,7 +362,9 @@ async fn hunting(config: Config) -> io::Result<()> {
     let selected_hunt = config.hunts[hunt_choice].clone();
     let drink = config.combat.drink.clone();
     let hp_regen_passive = config.combat.hp_regen_passive.clone();
+    let hp_to_continue = config.combat.hp_to_continue.clone();
     let mana_regen_passive = config.combat.mana_regen_passive.clone();
+    let mana_to_continue = config.combat.mana_to_continue.clone();
     let hp_to_defense_light = config.combat.hp_to_defense_light.clone();
     let hp_to_defense_full = config.combat.hp_to_defense_full.clone();
     let combat_basic = config.skills.basic.clone();
@@ -387,9 +393,9 @@ async fn hunting(config: Config) -> io::Result<()> {
     let hunting_task = task::spawn(async move {
         while running.load(Ordering::SeqCst) {
             for path in selected_hunt.route.iter() {
-                hunting_instance(unsafe { WINDOW_HANDLE }, &hp_regen_passive, &mana_regen_passive, &hp_to_defense_light, &hp_to_defense_full, &combat_defense_light, &combat_defense_full, &combat_start, &combat_combo, &combat_basic, global_cd, &drink, &selected_hunt);
+                hunting_instance(unsafe { WINDOW_HANDLE }, &hp_regen_passive, &mana_regen_passive, &hp_to_defense_light, &hp_to_defense_full, &combat_defense_light, &combat_defense_full, &combat_start, &combat_combo, &combat_basic, global_cd, &drink, &selected_hunt, &hp_to_continue, &mana_to_continue);
                 info!("Going to: {:?}", path);
-                hunting_path_walker(unsafe { WINDOW_HANDLE }, *path, &hp_regen_passive, &mana_regen_passive, &hp_to_defense_light, &hp_to_defense_full, &combat_basic, &combat_start, &combat_combo, &combat_defense_light, &combat_defense_full, global_cd, &drink, &selected_hunt);
+                hunting_path_walker(unsafe { WINDOW_HANDLE }, *path, &hp_regen_passive, &mana_regen_passive, &hp_to_defense_light, &hp_to_defense_full, &combat_basic, &combat_start, &combat_combo, &combat_defense_light, &combat_defense_full, global_cd, &drink, &selected_hunt, &hp_to_continue, &mana_to_continue);
             }
         }
     });
@@ -428,7 +434,9 @@ async fn only_walk(config: Config) -> io::Result<()> {
                     break;
                 }
             }
+            break;
         }
+        process::exit(0); // Encerra o programa com um código de status 1
     });
 
     let _ = timer_task.await?;

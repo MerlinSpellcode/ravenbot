@@ -112,7 +112,9 @@ pub struct Walk {
 pub struct Combat {
     pub drink: Drink,
     pub hp_regen_passive: String,
+    pub hp_to_continue: String,
     pub mana_regen_passive: String,
+    pub mana_to_continue: String,
     pub hp_to_defense_light: String,
     pub hp_to_defense_full: String,
     pub global_cd: u64,

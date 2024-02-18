@@ -5,7 +5,9 @@
         "hotkey": "F10" 
     },
     "hp_regen_passive": "90%",
+    "hp_to_continue": "100%",
     "mana_regen_passive": "90%",
+    "mana_to_continue": "100%",
     "hp_to_defense_light": "70%",
     "hp_to_defense_full": "50%",
     "global_cd": 1150
