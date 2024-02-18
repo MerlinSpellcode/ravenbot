@@ -16,12 +16,20 @@
 
 ### [Foods](./config/foods.json)
 
-- **status** -> hotkey para primeira food
+- **status** -> objeto com atributos para uso da food
+    - **hotkey** -> hotkey para a food
+    - **timer** -> tempo em minutos para executar as 3 hotkeys de food
+    - **name** -> name da food 
 - **hp_mana_regen** -> hotkey para segunda food
 - **attack_power** -> hotkey para terceira food
-- **timer** -> tempo em minutos para executar as 3 hotkeys de food
     
 ### [Hunts](./config/hunts.json) -> Array de objetos com as coordenadas de cada hunt
+
+- **name** -> Nome da rota
+- **route** -> array de coordenadas da rota
+- **stairs** -> boolean (true ou false), se true, vai garantir 2 segundos de sleep antes de comecar a rotaçao de skills
+
+### [Walks](./config/walks.json) -> Array de objetos com as coordenadas de cada walk
 
 - **name** -> Nome da rota
 - **route** -> array de coordenadas da rota

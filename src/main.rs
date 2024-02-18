@@ -417,9 +417,16 @@ async fn only_walk(config: Config) -> io::Result<()> {
     let timer_task = task::spawn(run_timer_general(running.clone()));
     let walking_task = task::spawn(async move {
         while running.load(Ordering::SeqCst) {
-            for path in selected_walk.route.iter() {
+            for (index, path) in selected_walk.route.iter().enumerate() {
                 info!("Going to: {:?}", path);
                 only_walk_path_walker(unsafe { WINDOW_HANDLE }, *path);
+
+                // Verifica se é o último elemento
+                if index == selected_walk.route.len() - 1 {
+                    info!("Reached the end of the walk!");
+                    // Faça o que precisa ser feito quando o loop chega ao final do array
+                    break;
+                }
             }
         }
     });
