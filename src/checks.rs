@@ -71,6 +71,24 @@ pub fn hp_need_restore(value_percent: &str) -> bool {
     hp_current < hp_threshold
 }
 
+pub fn hp_need_drink(value_percent: &str) -> bool {
+    let hp_current = get_hp_current();
+    let hp_max = get_hp_max();
+    let percent_value = value_percent.trim_end_matches('%').parse::<f64>()
+        .expect("Erro ao converter a porcentagem");
+    let hp_threshold = hp_max * (percent_value / 100.0);
+    hp_current < hp_threshold
+}
+
+pub fn mana_need_drink(value_percent: &str) -> bool {
+    let mana_current = get_mana_current();
+    let mana_max = get_mana_max();
+    let percent_value = value_percent.trim_end_matches('%').parse::<f64>()
+        .expect("Erro ao converter a porcentagem");
+    let mana_threshold = mana_max * (percent_value / 100.0);
+    mana_current < mana_threshold
+}
+
 
 pub fn is_hp_full() -> bool {
     let hp_current = get_hp_current();

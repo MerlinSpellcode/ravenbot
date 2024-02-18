@@ -1,6 +1,17 @@
 {
-    "status": "9",
-    "hp_mana_regen": "0",
-    "attack_power": "8",
-    "timer": 20
+    "status": {
+        "hotkey": "9",
+        "timer": 30,
+        "name": "Settlers Stew (Intelligence)"
+    },
+    "hp_mana_regen": {
+        "hotkey": "0",
+        "timer": 20,
+        "name": "Boozemelon"
+    },
+    "attack_power": {
+        "hotkey": "8",
+        "timer": 30,
+        "name": "Cake"
+    }
 }

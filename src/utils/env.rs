@@ -74,10 +74,16 @@ pub struct Config {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Foods {
-    pub status: String,
-    pub hp_mana_regen: String,
-    pub attack_power: String,
+    pub status: Food,
+    pub hp_mana_regen: Food,
+    pub attack_power: Food
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Food {
+    pub hotkey: String,
     pub timer: u64,
+    pub name: String
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -93,21 +99,30 @@ pub struct Skills {
 pub struct Hunt {
     pub name: String,
     pub route: Vec<[i32; 3]>,
+    pub stairs: bool
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Walk {
     pub name: String,
-    pub route: Vec<[i32; 3]>,
+    pub route: Vec<[i32; 3]>
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Combat {
+    pub drink: Drink,
     pub hp_regen_passive: String,
     pub mana_regen_passive: String,
     pub hp_to_defense_light: String,
     pub hp_to_defense_full: String,
     pub global_cd: u64,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Drink {
+    pub hp_to_use: String,
+    pub mana_to_use: String,
+    pub hotkey: String
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -131,16 +146,6 @@ pub struct Prereq {
     pub name: String,
     pub is_area: bool,
     pub has_global: bool
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Food {
-    pub hotkey: String,
-    pub duration: u64,
-    pub name: String,
-}
-pub struct Buffs {
-    pub food: Vec<Food>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

@@ -1,4 +1,9 @@
 {
+    "drink": {
+        "hp_to_use": "50%",
+        "mana_to_use": "50%",
+        "hotkey": "F10" 
+    },
     "hp_regen_passive": "90%",
     "mana_regen_passive": "90%",
     "hp_to_defense_light": "70%",
