@@ -657,7 +657,8 @@
         5489,
         7
       ]
-    ]
+    ],
+    "stairs": false
   },
   {
     "name": "hooks2",
@@ -1147,7 +1148,8 @@
         5125,
         5
       ]
-    ]
+    ],
+    "stairs": true
   },
   {
     "name": "mino-oculto",
@@ -1342,7 +1344,8 @@
         5528,
         9
       ]
-    ]
+    ],
+    "stairs": true
   },
   {
     "name": "Troll40-Perfect",
@@ -1552,7 +1555,8 @@
         5536,
         5
       ]
-    ]
+    ],
+    "stairs": true
   },
   {
     "name": "Orc40-outside",
@@ -1737,7 +1741,8 @@
         5520,
         7
       ]
-    ]
+    ],
+    "stairs": false
   },
   {
     "name": "Vampiros",
@@ -1922,7 +1927,8 @@
         4798,
         3
       ]
-    ]
+    ],
+    "stairs": true
   },
   {
     "name": "trollgelo",
@@ -2567,7 +2573,8 @@
         4169,
         6
       ]
-    ]
+    ],
+    "stairs": false
   },
   {
     "name": "BOG",
@@ -2787,7 +2794,8 @@
         4910,
         8
       ]
-    ]
+    ],
+    "stairs": false
   },
   {
     "name": "Kaiman47-gilead",
@@ -3382,7 +3390,8 @@
         5509,
         7
       ]
-    ]
+    ],
+    "stairs": false
   },
   {
     "name": "skell-gelo-under",
@@ -3612,7 +3621,8 @@
         4391,
         8
       ]
-    ]
+    ],
+    "stairs": false
   },
   {
     "name": "kaimans-madeira",
@@ -3827,7 +3837,8 @@
         5517,
         7
       ]
-    ]
+    ],
+    "stairs": false
   },
   {
     "name": "anao-gelado-under",
@@ -4192,6 +4203,7 @@
         4248,
         9
       ]
-    ]
+    ],
+    "stairs": false
   }
 ]
