@@ -203,29 +203,31 @@ fn create_hunting_coordinates() -> io::Result<()> {
         r.store(false, Ordering::SeqCst);
     }).expect("Erro ao definir o manipulador de Ctrl-C");
 
-    print!("Digite o nome da sua hunt: ");
-    let mut nome = String::new();
-    io::stdin().read_line(&mut nome).expect("Falha ao ler a entrada");
-    let nome = nome.trim().to_string();
-
-    print!("A sua hunt vai ter escadas? ");
-    print!("1: Sim ");
-    print!("0: Não ");
+    println!("A sua hunt vai ter escadas? ");
+    println!("1: Sim ");
+    println!("0: Não ");
     let mut stairs_choice = String::new();
     let mut stairs_bool = false;
     io::stdin().read_line(&mut stairs_choice)?;
     match stairs_choice.trim() {
         "1" => { 
-            stairs_bool = true; io::stdout().flush().unwrap()
+            stairs_bool = true; 
         },
         "0" => {
-            stairs_bool = false; io::stdout().flush().unwrap()
+            stairs_bool = false;
         }
         _ => {
             println!("Opção inválida, por favor, tente novamente.");
             let _ = create_hunting_coordinates();
         }
     }
+
+    print!("Digite o nome da sua hunt: ");
+    let mut nome = String::new();
+    io::stdout().flush().unwrap();
+
+    io::stdin().read_line(&mut nome).expect("Falha ao ler a entrada");
+    let nome = nome.trim().to_string();
 
     let file_path = "config/hunts.json";
     let mut config = read_config();
@@ -432,7 +434,9 @@ async fn only_walk(config: Config) -> io::Result<()> {
                     break;
                 }
             }
+            break;
         }
+        process::exit(0); // Encerra o programa com um código de status 1
     });
 
     let _ = timer_task.await?;
