@@ -89,13 +89,13 @@
       "name": "Arcane Torrent",
       "is_area": false,
       "prereq": {
-        "hotkey": "2",
-        "mana": 258,
-        "aether": true,
-        "cooldown": 60,
-        "name": "Mirror Image",
+        "hotkey": "",
+        "mana": 0,
+        "aether": false,
+        "cooldown": 0,
+        "name": "",
         "is_area": false,
-        "has_global": true
+        "has_global": false
       },
       "has_global": true
     },

@@ -1,8 +1,8 @@
 use log::info;
 use winapi::shared::windef::HWND;
 use crate::utils::inputs::{press_w, press_a, press_s, press_d, press_skill, press_tab, double_press_skill};
-use crate::utils::env::{BasicS, Prereq, Skill};
-use crate::checks::{get_aether, hp_need_restore, mana_need_restore, is_hp_full, is_mana_full, get_target, get_coord, get_mana_actual, get_hp_actual};
+use crate::utils::env::{BasicS, Drink, Hunt, Prereq, Skill};
+use crate::checks::{get_aether, get_coord, get_hp_actual, get_mana_actual, get_target, hp_need_drink, hp_need_restore, is_hp_full, is_mana_full, mana_need_drink, mana_need_restore};
 
 // use tokio::time::{Duration, Instant};
 // use std::collections::HashMap;
@@ -224,7 +224,7 @@ fn combo_skills(hwnd: HWND, hp_to_defense_light: &str, hp_to_defense_full: &str,
     }
 }
 
-pub fn hunting_path_walker(hwnd: HWND, destination: [i32; 3], hp_regen_passive: &str, mana_regen_passive: &str, hp_to_defense_light: &str, hp_to_defense_full: &str, combat_basic: &[BasicS], combat_start: &[Skill], combat_combo: &[Skill], combat_defense_light: &[Skill], combat_defense_full: &[Skill], global_cd: u64) {
+pub fn hunting_path_walker(hwnd: HWND, destination: [i32; 3], hp_regen_passive: &str, mana_regen_passive: &str, hp_to_defense_light: &str, hp_to_defense_full: &str, combat_basic: &[BasicS], combat_start: &[Skill], combat_combo: &[Skill], combat_defense_light: &[Skill], combat_defense_full: &[Skill], global_cd: u64, drink: &Drink, selected_hunt: &Hunt) {
     let mut attempts = 0;
     let max_attempts = 1000; // Limite para tentativas de movimento para evitar loop infinito
 
@@ -256,7 +256,7 @@ pub fn hunting_path_walker(hwnd: HWND, destination: [i32; 3], hp_regen_passive: 
         let new_coord = get_coord();
         if new_coord == current {
             // O personagem não se moveu, então tenta outro movimento
-            hunting_instance(hwnd, hp_regen_passive, mana_regen_passive, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_start, combat_combo, combat_basic, global_cd);
+            hunting_instance(hwnd, hp_regen_passive, mana_regen_passive, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_start, combat_combo, combat_basic, global_cd, drink, selected_hunt);
             attempts += 1;
         } else {
             // Reseta as tentativas se houver movimento
@@ -304,10 +304,12 @@ pub fn only_walk_path_walker(hwnd: HWND, destination: [i32; 3]) {
     }
 }
 
-pub fn hunting_instance(hwnd: HWND, hp_regen_passive: &str, mana_regen_passive: &str, hp_to_defense_light: &str, hp_to_defense_full: &str, combat_defense_light:&[Skill], combat_defense_full:&[Skill], combat_start: &[Skill], combat_combo: &[Skill], combat_basic: &[BasicS], global_cd: u64) {
+pub fn hunting_instance(hwnd: HWND, hp_regen_passive: &str, mana_regen_passive: &str, hp_to_defense_light: &str, hp_to_defense_full: &str, combat_defense_light:&[Skill], combat_defense_full:&[Skill], combat_start: &[Skill], combat_combo: &[Skill], combat_basic: &[BasicS], global_cd: u64, drink: &Drink, selected_hunt: &Hunt) {
     while check_target(hwnd) {
         info!("Target found. Starting FIGHT.");
-        std::thread::sleep(std::time::Duration::from_millis(2100));
+        if selected_hunt.stairs {
+            std::thread::sleep(std::time::Duration::from_millis(2100));
+        }
         defensive_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_basic, global_cd);
         start_fight(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_basic, global_cd, combat_start);
         combo_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_combo, combat_basic, global_cd);
@@ -317,7 +319,10 @@ pub fn hunting_instance(hwnd: HWND, hp_regen_passive: &str, mana_regen_passive: 
         get_hp_actual();
         info!("HP needs passive restore.");
         while is_hp_full() {
-            std::thread::sleep(std::time::Duration::from_secs(1));
+            std::thread::sleep(std::time::Duration::from_secs(2));
+            if hp_need_drink(&drink.hp_to_use) {
+                press_skill(hwnd, &drink.hotkey)
+            }
             if check_target(hwnd) {
                 break;
             }
@@ -327,7 +332,10 @@ pub fn hunting_instance(hwnd: HWND, hp_regen_passive: &str, mana_regen_passive: 
         get_mana_actual();
         info!("Mana needs passive restore.");
         while is_mana_full() {
-            std::thread::sleep(std::time::Duration::from_secs(1));
+            std::thread::sleep(std::time::Duration::from_secs(2));
+            if mana_need_drink(&drink.mana_to_use) {
+                press_skill(hwnd, &drink.hotkey)
+            }
             if check_target(hwnd) {
                 break;
             }

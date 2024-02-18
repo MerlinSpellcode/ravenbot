@@ -99,21 +99,30 @@ pub struct Skills {
 pub struct Hunt {
     pub name: String,
     pub route: Vec<[i32; 3]>,
+    pub stairs: bool
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Walk {
     pub name: String,
-    pub route: Vec<[i32; 3]>,
+    pub route: Vec<[i32; 3]>
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Combat {
+    pub drink: Drink,
     pub hp_regen_passive: String,
     pub mana_regen_passive: String,
     pub hp_to_defense_light: String,
     pub hp_to_defense_full: String,
     pub global_cd: u64,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Drink {
+    pub hp_to_use: String,
+    pub mana_to_use: String,
+    pub hotkey: String
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
