@@ -2,7 +2,7 @@ use log::info;
 use winapi::shared::windef::HWND;
 use crate::utils::inputs::{press_w, press_a, press_s, press_d, press_skill, press_tab, double_press_skill};
 use crate::utils::env::{BasicS, Drink, Hunt, Prereq, Skill};
-use crate::checks::{get_aether, get_coord, get_hp_actual, get_mana_actual, get_target, hp_need_drink, hp_need_combat_restore, hp_need_passive_restore, is_hp_full, is_mana_full, mana_need_drink, mana_need_passive_restore};
+use crate::checks::{get_aether, get_coord, get_hp_actual, get_mana_actual, get_target, hp_can_continue, hp_need_combat_restore, hp_need_drink, hp_need_passive_restore, mana_can_continue, mana_need_drink, mana_need_passive_restore};
 
 // use tokio::time::{Duration, Instant};
 // use std::collections::HashMap;
@@ -315,10 +315,10 @@ pub fn hunting_instance(hwnd: HWND, hp_regen_passive: &str, mana_regen_passive: 
         combo_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_combo, combat_basic, global_cd);
     }
     
-    if hp_need_passive_restore(hp_regen_passive, hp_to_continue) {
+    if hp_need_passive_restore(hp_regen_passive) {
         get_hp_actual();
         info!("HP needs passive restore.");
-        while is_hp_full() {
+        while hp_can_continue(hp_to_continue) {
             std::thread::sleep(std::time::Duration::from_secs(2));
             if hp_need_drink(&drink.hp_to_use) {
                 press_skill(hwnd, &drink.hotkey)
@@ -328,10 +328,10 @@ pub fn hunting_instance(hwnd: HWND, hp_regen_passive: &str, mana_regen_passive: 
             }
         }
     }
-    if mana_need_passive_restore(mana_regen_passive, mana_to_continue) {
+    if mana_need_passive_restore(mana_regen_passive) {
         get_mana_actual();
         info!("Mana needs passive restore.");
-        while is_mana_full() {
+        while mana_can_continue(mana_to_continue) {
             std::thread::sleep(std::time::Duration::from_secs(2));
             if mana_need_drink(&drink.mana_to_use) {
                 press_skill(hwnd, &drink.hotkey)
