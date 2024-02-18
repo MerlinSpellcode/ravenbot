@@ -74,10 +74,16 @@ pub struct Config {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Foods {
-    pub status: String,
-    pub hp_mana_regen: String,
-    pub attack_power: String,
+    pub status: Food,
+    pub hp_mana_regen: Food,
+    pub attack_power: Food
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Food {
+    pub hotkey: String,
     pub timer: u64,
+    pub name: String
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -131,16 +137,6 @@ pub struct Prereq {
     pub name: String,
     pub is_area: bool,
     pub has_global: bool
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct Food {
-    pub hotkey: String,
-    pub duration: u64,
-    pub name: String,
-}
-pub struct Buffs {
-    pub food: Vec<Food>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

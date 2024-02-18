@@ -45,7 +45,7 @@ pub fn press_skill(hwnd: HWND, skill: &str) {
             thread::sleep(Duration::from_millis(100));
         }
         None => {
-            warn!("Hotkey not found for hotkey: {}", skill);
+            warn!("Hotkey not found for: {}", skill);
             // Ou você pode retornar um erro e lidar com ele no código que chama essa função:
             // return Err(format!("Hotkey not found for skill: {}", skill).into());
         }

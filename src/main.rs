@@ -6,6 +6,8 @@ use std::fs;
 use std::process;
 use std::io::{self, Write};
 use ravenbot::commands::only_walk_path_walker;
+use ravenbot::utils::env::Food;
+use tokio::time::sleep;
 use winapi::um::winuser::{GetAsyncKeyState, VK_F1};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
@@ -88,7 +90,7 @@ extern "system" fn enum_windows_callback(window: HWND, param: LPARAM) -> BOOL {
     1 // Retorna verdadeiro para continuar a enumeração
 }
 
-async fn run_timer_for_foods(foods: Foods, running: Arc<AtomicBool>) {
+async fn run_timer_for_foods(food: Food, running: Arc<AtomicBool>) {
     let _hwnd = match get_window_handle() {
         Ok(hwnd) => hwnd,
         Err(err) => {
@@ -98,11 +100,11 @@ async fn run_timer_for_foods(foods: Foods, running: Arc<AtomicBool>) {
         }
     };
 
-    let mut interval = interval(Duration::from_secs(foods.timer * 60)); // X minutos baseado no config
+    let mut interval = interval(Duration::from_secs(food.timer * 60)); // X minutos baseado no config
 
     while running.load(Ordering::SeqCst) {
         interval.tick().await;
-        use_foods(&foods);
+        use_foods(&food);
     }
 }
 
@@ -157,15 +159,11 @@ fn read_config() -> Config {
     return config_contents;
 }
 
-pub fn use_foods(foods: &Foods){
+pub fn use_foods(food: &Food){
     let brt = chrono::FixedOffset::west_opt(3 * 3600).unwrap(); // Horário de Brasília (UTC-3)
     let current_time = Local::now().with_timezone(&brt);
-    info!("Using foods at {:02}:{:02}:{:02} BRT..", current_time.hour(), current_time.minute(), current_time.second());
-    press_skill(unsafe { WINDOW_HANDLE }, &foods.status);
-    thread::sleep(Duration::from_millis(100));
-    press_skill(unsafe { WINDOW_HANDLE }, &foods.attack_power);
-    thread::sleep(Duration::from_millis(100));
-    press_skill(unsafe { WINDOW_HANDLE }, &foods.hp_mana_regen);
+    info!("Using {} at {:02}:{:02}:{:02} BRT..", food.name, current_time.hour(), current_time.minute(), current_time.second());
+    press_skill(unsafe { WINDOW_HANDLE }, &food.hotkey);
     thread::sleep(Duration::from_millis(100));
 }
 
@@ -360,7 +358,15 @@ async fn hunting(config: Config) -> io::Result<()> {
         r.store(false, Ordering::SeqCst);
     }).expect("Erro ao definir o manipulador de Ctrl-C");
 
-    let food_task = task::spawn(run_timer_for_foods(config.foods.clone(), running.clone()));
+    let status_food_task = task::spawn(run_timer_for_foods(config.foods.status.clone(), running.clone()));
+    // Aguarde um curto período de tempo antes de iniciar a próxima tarefa
+    sleep(Duration::from_millis(100)).await;
+    let attack_power_task = task::spawn(run_timer_for_foods(config.foods.attack_power.clone(), running.clone()));
+    // Aguarde um curto período de tempo antes de iniciar a próxima tarefa
+    sleep(Duration::from_millis(100)).await;
+    let hp_mana_regen_food_task = task::spawn(run_timer_for_foods(config.foods.hp_mana_regen.clone(), running.clone()));
+    // Aguarde um curto período de tempo antes de iniciar a próxima tarefa
+    sleep(Duration::from_millis(100)).await;
     let hunting_task = task::spawn(async move {
         while running.load(Ordering::SeqCst) {
             for path in selected_hunt.route.iter() {
@@ -371,7 +377,9 @@ async fn hunting(config: Config) -> io::Result<()> {
         }
     });
 
-    let _ = food_task.await?;
+    let _ = status_food_task.await?;
+    let _ = attack_power_task.await?;
+    let _ = hp_mana_regen_food_task.await?;
     let _ = hunting_task.await?;
     
     Ok(())

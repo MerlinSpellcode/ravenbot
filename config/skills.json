@@ -44,6 +44,24 @@
       "has_global": true
     },
     {
+      "hotkey": "F1",
+      "mana": 195,
+      "aether": true,
+      "cooldown": 35,
+      "name": "Pyroblast",
+      "is_area": false,
+      "prereq": {
+        "hotkey": "",
+        "mana": 0,
+        "aether": false,
+        "cooldown": 0,
+        "name": "",
+        "is_area": false,
+        "has_global": false
+      },
+      "has_global": true
+    },
+    {
       "hotkey": "F2",
       "mana": 66,
       "aether": true,
@@ -63,24 +81,6 @@
     }
   ],
   "combo": [
-    {
-      "hotkey": "F1",
-      "mana": 195,
-      "aether": true,
-      "cooldown": 35,
-      "name": "Pyroblast",
-      "is_area": false,
-      "prereq": {
-        "hotkey": "",
-        "mana": 0,
-        "aether": false,
-        "cooldown": 0,
-        "name": "",
-        "is_area": false,
-        "has_global": false
-      },
-      "has_global": true
-    },
     {
       "hotkey": "R",
       "mana": 64,
@@ -122,7 +122,7 @@
       "mana": 199,
       "aether": true,
       "cooldown": 60,
-      "name": "Death Pulse",
+      "name": "Death Touch",
       "is_area": false,
       "prereq": {
         "hotkey": "Q",
@@ -142,24 +142,6 @@
       "cooldown": 45,
       "name": "Flame Tornado",
       "is_area": true,
-      "prereq": {
-        "hotkey": "",
-        "mana": 0,
-        "aether": false,
-        "cooldown": 0,
-        "name": "",
-        "is_area": false,
-        "has_global": false
-      },
-      "has_global": true
-    },
-    {
-      "hotkey": "2",
-      "mana": 258,
-      "aether": true,
-      "cooldown": 60,
-      "name": "Mirror Image",
-      "is_area": false,
       "prereq": {
         "hotkey": "",
         "mana": 0,
