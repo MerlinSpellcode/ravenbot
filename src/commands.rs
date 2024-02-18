@@ -2,7 +2,7 @@ use log::info;
 use winapi::shared::windef::HWND;
 use crate::utils::inputs::{press_w, press_a, press_s, press_d, press_skill, press_tab, double_press_skill};
 use crate::utils::env::{BasicS, Drink, Hunt, Prereq, Skill};
-use crate::checks::{get_aether, get_coord, get_hp_actual, get_mana_actual, get_target, hp_need_drink, hp_need_restore, is_hp_full, is_mana_full, mana_need_drink, mana_need_restore};
+use crate::checks::{get_aether, get_coord, get_hp_actual, get_mana_actual, get_target, hp_need_drink, hp_need_combat_restore, hp_need_passive_restore, is_hp_full, is_mana_full, mana_need_drink, mana_need_passive_restore};
 
 // use tokio::time::{Duration, Instant};
 // use std::collections::HashMap;
@@ -169,7 +169,7 @@ fn cast_skill(hwnd: HWND, skill: &Skill, global_cd: u64, combat_basic: &[BasicS]
 }
 
 fn defensive_skills(hwnd: HWND, hp_to_defense_light: &str, hp_to_defense_full: &str, combat_defense_light:&[Skill], combat_defense_full:&[Skill], combat_basic: &[BasicS], global_cd: u64){
-    if hp_need_restore(hp_to_defense_full){
+    if hp_need_combat_restore(hp_to_defense_full){
         get_hp_actual();
         info!("HP on critical situation. Starting full defensive skills.");
         for skill in combat_defense_full.iter(){
@@ -181,7 +181,7 @@ fn defensive_skills(hwnd: HWND, hp_to_defense_light: &str, hp_to_defense_full: &
                 break;
             }
         }
-    } else if hp_need_restore(hp_to_defense_light) {
+    } else if hp_need_combat_restore(hp_to_defense_light) {
         get_hp_actual();
         info!("HP on hard situation. Starting light defensive skills.");
         for skill in combat_defense_light.iter(){
@@ -224,7 +224,7 @@ fn combo_skills(hwnd: HWND, hp_to_defense_light: &str, hp_to_defense_full: &str,
     }
 }
 
-pub fn hunting_path_walker(hwnd: HWND, destination: [i32; 3], hp_regen_passive: &str, mana_regen_passive: &str, hp_to_defense_light: &str, hp_to_defense_full: &str, combat_basic: &[BasicS], combat_start: &[Skill], combat_combo: &[Skill], combat_defense_light: &[Skill], combat_defense_full: &[Skill], global_cd: u64, drink: &Drink, selected_hunt: &Hunt) {
+pub fn hunting_path_walker(hwnd: HWND, destination: [i32; 3], hp_regen_passive: &str, mana_regen_passive: &str, hp_to_defense_light: &str, hp_to_defense_full: &str, combat_basic: &[BasicS], combat_start: &[Skill], combat_combo: &[Skill], combat_defense_light: &[Skill], combat_defense_full: &[Skill], global_cd: u64, drink: &Drink, selected_hunt: &Hunt, hp_to_continue: &str, mana_to_continue: &str) {
     let mut attempts = 0;
     let max_attempts = 1000; // Limite para tentativas de movimento para evitar loop infinito
 
@@ -256,7 +256,7 @@ pub fn hunting_path_walker(hwnd: HWND, destination: [i32; 3], hp_regen_passive: 
         let new_coord = get_coord();
         if new_coord == current {
             // O personagem não se moveu, então tenta outro movimento
-            hunting_instance(hwnd, hp_regen_passive, mana_regen_passive, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_start, combat_combo, combat_basic, global_cd, drink, selected_hunt);
+            hunting_instance(hwnd, hp_regen_passive, mana_regen_passive, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_start, combat_combo, combat_basic, global_cd, drink, selected_hunt, hp_to_continue, mana_to_continue);
             attempts += 1;
         } else {
             // Reseta as tentativas se houver movimento
@@ -304,7 +304,7 @@ pub fn only_walk_path_walker(hwnd: HWND, destination: [i32; 3]) {
     }
 }
 
-pub fn hunting_instance(hwnd: HWND, hp_regen_passive: &str, mana_regen_passive: &str, hp_to_defense_light: &str, hp_to_defense_full: &str, combat_defense_light:&[Skill], combat_defense_full:&[Skill], combat_start: &[Skill], combat_combo: &[Skill], combat_basic: &[BasicS], global_cd: u64, drink: &Drink, selected_hunt: &Hunt) {
+pub fn hunting_instance(hwnd: HWND, hp_regen_passive: &str, mana_regen_passive: &str, hp_to_defense_light: &str, hp_to_defense_full: &str, combat_defense_light:&[Skill], combat_defense_full:&[Skill], combat_start: &[Skill], combat_combo: &[Skill], combat_basic: &[BasicS], global_cd: u64, drink: &Drink, selected_hunt: &Hunt, hp_to_continue: &str, mana_to_continue: &str) {
     while check_target(hwnd) {
         info!("Target found. Starting FIGHT.");
         if selected_hunt.stairs {
@@ -315,7 +315,7 @@ pub fn hunting_instance(hwnd: HWND, hp_regen_passive: &str, mana_regen_passive: 
         combo_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_combo, combat_basic, global_cd);
     }
     
-    if hp_need_restore(hp_regen_passive) {
+    if hp_need_passive_restore(hp_regen_passive, hp_to_continue) {
         get_hp_actual();
         info!("HP needs passive restore.");
         while is_hp_full() {
@@ -328,7 +328,7 @@ pub fn hunting_instance(hwnd: HWND, hp_regen_passive: &str, mana_regen_passive: 
             }
         }
     }
-    if mana_need_restore(mana_regen_passive) {
+    if mana_need_passive_restore(mana_regen_passive, mana_to_continue) {
         get_mana_actual();
         info!("Mana needs passive restore.");
         while is_mana_full() {
