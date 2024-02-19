@@ -8,8 +8,14 @@
 
 ### [Combat](./config/combat.json) -> Objeto de Configuração que necessita de interação do usuário
 
+- **drink** -> Objeto para configuração de uso de Drink
+    - **hp_to_use** -> Porcentagem de HP para usar o drink
+    - **mana_to_use** -> Porcentagem de Mana para usar o drink
+    - **hotkey** -> Hotkey do drink
 - **hp_regen_passive** -> limite de porcentagem de HP para que o personagem pare para curar passivamente
+- **hp_to_continue** -> porcentagem de HP para que o personagem volte a andar
 - **mana_regen_passive** -> limite de porcentagem de Mana para que o personagem pare para curar passivamente
+- **mana_to_continue** -> porcentagem de Mana para que o personagem volte a andar
 - **hp_to_defense_light** -> limite de porcentagem de HP para que o script execute as skills da variável "defense_light"
 - **hp_to_defense_full** -> limite de porcentagem de HP para que o script execute as skills da variável "defense_light"
 - **global_cd** -> valor em milissegundos para setar o global cooldown do seu personagem (ex.: 1100 = 1,1 segundos)

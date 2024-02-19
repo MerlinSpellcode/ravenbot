@@ -5,9 +5,9 @@ extern crate serde_json;
 use std::fs;
 use std::process;
 use std::io::{self, Write};
+use std::time::Duration;
 use ravenbot::commands::only_walk_path_walker;
-use ravenbot::utils::env::Food;
-use ravenbot::utils::env::Timer;
+use ravenbot::utils::env::{Food, Timer};
 use tokio::time::sleep;
 use winapi::um::winuser::{GetAsyncKeyState, VK_F1};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -21,12 +21,7 @@ use std::ptr;
 use std::thread;
 
 use ravenbot::utils::address::get_base_address;
-use ravenbot::utils::env::Config;
-use ravenbot::utils::env::Hunt;
-use ravenbot::utils::env::Walk;
-use ravenbot::utils::env::Skills;
-use ravenbot::utils::env::Combat;
-use ravenbot::utils::env::Foods;
+use ravenbot::utils::env::{Config, Hunt, Walk, Skills, Combat, Foods, CooldownManager};
 use ravenbot::utils::inputs::press_skill;
 use ravenbot::commands::hunting_instance;
 use ravenbot::commands::only_combat_instance;
@@ -34,7 +29,6 @@ use ravenbot::commands::hunting_path_walker;
 use ravenbot::checks::get_coord;
 use ravenbot::checks::check_hwid;
 
-use std::time::Duration;
 use tokio::{time::interval, task};
 
 use chrono::{Local, Timelike};
@@ -453,6 +447,9 @@ async fn hunting(config: Config) -> io::Result<()> {
     let combat_defense_full = config.skills.defense_full.clone();
     let global_cd = config.combat.global_cd.clone();
 
+    let skills = config.skills.clone();
+    let mut cooldown_manager = cooldown_manager_construct(&skills);
+
     let running = Arc::new(AtomicBool::new(true));
     let r = running.clone();
 
@@ -475,9 +472,9 @@ async fn hunting(config: Config) -> io::Result<()> {
     let hunting_task = task::spawn(async move {
         while running.load(Ordering::SeqCst) {
             for path in selected_hunt.route.iter() {
-                hunting_instance(unsafe { WINDOW_HANDLE }, &hp_regen_passive, &mana_regen_passive, &hp_to_defense_light, &hp_to_defense_full, &combat_defense_light, &combat_defense_full, &combat_start, &combat_combo, &combat_basic, global_cd, &drink, &selected_hunt, &hp_to_continue, &mana_to_continue);
+                hunting_instance(unsafe { WINDOW_HANDLE }, &hp_regen_passive, &mana_regen_passive, &hp_to_defense_light, &hp_to_defense_full, &combat_defense_light, &combat_defense_full, &combat_start, &combat_combo, &combat_basic, global_cd, &drink, &selected_hunt, &hp_to_continue, &mana_to_continue, &mut cooldown_manager);
                 info!("Going to: {:?}", path);
-                hunting_path_walker(unsafe { WINDOW_HANDLE }, *path, &hp_regen_passive, &mana_regen_passive, &hp_to_defense_light, &hp_to_defense_full, &combat_basic, &combat_start, &combat_combo, &combat_defense_light, &combat_defense_full, global_cd, &drink, &selected_hunt, &hp_to_continue, &mana_to_continue);
+                hunting_path_walker(unsafe { WINDOW_HANDLE }, *path, &hp_regen_passive, &mana_regen_passive, &hp_to_defense_light, &hp_to_defense_full, &combat_basic, &combat_start, &combat_combo, &combat_defense_light, &combat_defense_full, global_cd, &drink, &selected_hunt, &hp_to_continue, &mana_to_continue, &mut cooldown_manager);
             }
         }
     });
@@ -540,6 +537,9 @@ async fn only_combat(config: Config) -> io::Result<()> {
     let combat_defense_full = config.skills.defense_full.clone();
     let global_cd = config.combat.global_cd.clone();
 
+    let skills = config.skills.clone();
+    let mut cooldown_manager = cooldown_manager_construct(&skills);
+
     let running = Arc::new(AtomicBool::new(true));
     let r = running.clone();
 
@@ -551,7 +551,7 @@ async fn only_combat(config: Config) -> io::Result<()> {
     let hunting_task = task::spawn(async move {
         info!("Starting only combat. Manual walk.");
         while running.load(Ordering::SeqCst) {
-            only_combat_instance(unsafe { WINDOW_HANDLE }, &hp_to_defense_light, &hp_to_defense_full, &combat_defense_light, &combat_defense_full, &combat_start, &combat_combo, &combat_basic, global_cd);
+            only_combat_instance(unsafe { WINDOW_HANDLE }, &hp_to_defense_light, &hp_to_defense_full, &combat_defense_light, &combat_defense_full, &combat_start, &combat_combo, &combat_basic, global_cd, &mut cooldown_manager);
         }
     });
 
@@ -561,43 +561,22 @@ async fn only_combat(config: Config) -> io::Result<()> {
     Ok(())
 }
 
-// Função para pausar e despausar o processo
-// async fn pause_process(running: Arc<AtomicBool>) -> bool {
-//     const PAUSE_DEBOUNCE_DURATION: u128 = 500; // Em milissegundos
-//     let mut paused = false;
-//     let mut last_toggle_time = Instant::now();
-
-//     loop {
-//         let elapsed = last_toggle_time.elapsed().as_millis();
-
-//         if is_pause_pressed() && elapsed > PAUSE_DEBOUNCE_DURATION {
-//             paused = !paused;
-//             last_toggle_time = Instant::now(); // Reinicia o temporizador
-
-//             if paused {
-//                 info!("Pausing process...");
-//             } else {
-//                 info!("Resuming process...");
-//             }
-
-//             while is_pause_pressed() {
-//                 info!("Waiting for pause key release...");
-//                 sleep(Duration::from_millis(100)).await;
-//             }
-
-//             info!("Process resumed and the value of paused is {}.", paused); // Verifique se a mensagem é exibida quando o processo é retomado.
-
-//         } 
-//         sleep(Duration::from_millis(100)).await; // Aguarde um curto período antes de verificar novamente.
-//     }
-// }
-
-// // Função para verificar se a hotkey de pausa foi pressionada
-// fn is_pause_pressed() -> bool {
-//     unsafe {
-//         (GetAsyncKeyState(VK_PAUSE) as u16 & 0x8000) != 0
-//     }
-// }
+fn cooldown_manager_construct(skills: &Skills) -> CooldownManager {
+    let mut cooldown_manager = CooldownManager::new();
+    for skill in skills.start.iter(){
+        cooldown_manager.set_cooldown(&skill.hotkey, Duration::from_secs(skill.cooldown));
+    }
+    for skill in skills.combo.iter(){
+        cooldown_manager.set_cooldown(&skill.hotkey, Duration::from_secs(skill.cooldown));
+    }
+    for skill in skills.defense_full.iter(){
+        cooldown_manager.set_cooldown(&skill.hotkey, Duration::from_secs(skill.cooldown));
+    }
+    for skill in skills.defense_light.iter(){
+        cooldown_manager.set_cooldown(&skill.hotkey, Duration::from_secs(skill.cooldown));
+    }
+    cooldown_manager
+}
 
 fn main() {
     env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();

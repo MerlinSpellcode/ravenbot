@@ -1,5 +1,6 @@
 use lazy_static::lazy_static;
 use std::collections::HashMap;
+use std::time::{Duration, Instant};
 use serde::{Serialize, Deserialize};
 use std::fs::File;
 
@@ -61,6 +62,40 @@ lazy_static! {
         m.insert("9", 0x39);
         m
     };
+}
+
+pub struct CooldownManager {
+    pub cooldowns: HashMap<String, Duration>,
+    pub last_execution: HashMap<String, Instant>,
+}
+impl CooldownManager {
+    pub fn new() -> Self {
+        CooldownManager {
+            cooldowns: HashMap::new(),
+            last_execution: HashMap::new(),
+        }
+    }
+
+    pub fn set_cooldown(&mut self, action: &str, cooldown_duration: Duration) {
+        self.cooldowns.insert(action.to_string(), cooldown_duration);
+    }
+
+    pub fn execute_action(&mut self, action: &str) -> bool {
+        if let Some(cooldown_duration) = self.cooldowns.get(action) {
+            if let Some(last_execution) = self.last_execution.get(action) {
+                let elapsed_time = last_execution.elapsed();
+                if elapsed_time >= *cooldown_duration {
+                    self.last_execution.insert(action.to_string(), Instant::now());
+                    return true; // A ação pode ser executada
+                }
+            } else {
+                // Se esta é a primeira execução da ação
+                self.last_execution.insert(action.to_string(), Instant::now());
+                return true; // A ação pode ser executada
+            }
+        }
+        false // A ação não pode ser executada devido ao cooldown
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
