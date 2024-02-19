@@ -34,6 +34,11 @@
 - **name** -> Nome da rota
 - **route** -> array de coordenadas da rota
 
+### [Timer](./config/timer.json) -> Objeto de configuração do timer
+
+- **flag** -> boolean (true ou false), se true, vai acionar o timer para desligar o processo do script de acordo com a quantidade de horas
+- **hours** -> quantidade de horas para desligar o script
+
 ### [Skills](./config/skills.json)
 
 - **basic** -> Objeto de configuração da skill básica geradora de Aether

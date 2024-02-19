@@ -7,6 +7,7 @@ use std::process;
 use std::io::{self, Write};
 use ravenbot::commands::only_walk_path_walker;
 use ravenbot::utils::env::Food;
+use ravenbot::utils::env::Timer;
 use tokio::time::sleep;
 use winapi::um::winuser::{GetAsyncKeyState, VK_F1};
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -108,7 +109,15 @@ async fn run_timer_for_foods(food: Food, running: Arc<AtomicBool>) {
     }
 }
 
-async fn run_timer_general(running: Arc<AtomicBool>) {
+pub fn use_foods(food: &Food){
+    let brt = chrono::FixedOffset::west_opt(3 * 3600).unwrap(); // Horário de Brasília (UTC-3)
+    let current_time = Local::now().with_timezone(&brt);
+    info!("Using {} at {:02}:{:02}:{:02} BRT..", food.name, current_time.hour(), current_time.minute(), current_time.second());
+    press_skill(unsafe { WINDOW_HANDLE }, &food.hotkey);
+    thread::sleep(Duration::from_millis(100));
+}
+
+async fn run_timer_general(running: Arc<AtomicBool>, timer: Timer) {
     let _hwnd = match get_window_handle() {
         Ok(hwnd) => hwnd,
         Err(err) => {
@@ -120,51 +129,121 @@ async fn run_timer_general(running: Arc<AtomicBool>) {
 
     let mut count = 0; // Move a variável count para fora do loop para mantê-la entre as iterações
 
-    let mut interval = interval(Duration::from_secs(1 * 60));
+    let mut interval = interval(Duration::from_secs(60 * 60));
 
     while running.load(Ordering::SeqCst) {
         interval.tick().await;
         info!("You are playing for {} hours.", count);
         count += 1; // Incrementa o contador em cada iteração do loop
+        if timer.flag && timer.hours < count {
+            info!("Finishing process according to {} hours on config.", timer.hours);
+            process::exit(0); // Encerra o programa com um código de status 0
+        }
     }
 }
 
 fn read_config() -> Config {
 
-    let config_combat: Combat = serde_json::from_str(&fs::read_to_string("config/combat.json")
-        .expect("Erro ao ler o arquivo combat.json"))
-        .expect("Erro ao deserializar o arquivo combat.json");
-    let config_skills: Skills = serde_json::from_str(&fs::read_to_string("config/skills.json")
-        .expect("Erro ao ler o arquivo skills.json"))
-        .expect("Erro ao deserializar o arquivo skills.json");
-    let config_hunts: Vec<Hunt> = serde_json::from_str(&fs::read_to_string("config/hunts.json")
-        .expect("Erro ao ler o arquivo hunts.json"))
-        .expect("Erro ao deserializar o arquivo hunts.json");
-    let config_walks: Vec<Walk> = serde_json::from_str(&fs::read_to_string("config/walks.json")
-        .expect("Erro ao ler o arquivo walks.json"))
-        .expect("Erro ao deserializar o arquivo walks.json");
-    let config_foods: Foods = serde_json::from_str(&fs::read_to_string("config/foods.json")
-        .expect("Erro ao ler o arquivo foods.json"))
-        .expect("Erro ao deserializar o arquivo foods.json");
+    let combat_contents = match fs::read_to_string("config/combat.json") {
+        Ok(contents) => contents,
+        Err(err) => {
+            eprintln!("Erro ao ler o arquivo combat.json: {}", err);
+            process::exit(1); // Encerra o programa com um código de status 1;
+        }
+    };
+    let config_combat: Combat = match serde_json::from_str(&combat_contents) {
+        Ok(value) => value,
+        Err(err) => {
+            eprintln!("Erro ao desserializar o arquivo combat.json: {}", err);
+            process::exit(1); // Encerra o programa com um código de status 1;
+        }
+    };
+
+    let skills_contents = match fs::read_to_string("config/skills.json") {
+        Ok(contents) => contents,
+        Err(err) => {
+            eprintln!("Erro ao ler o arquivo combat.json: {}", err);
+            process::exit(1); // Encerra o programa com um código de status 1;
+        }
+    };
+    let config_skills: Skills = match serde_json::from_str(&skills_contents) {
+        Ok(value) => value,
+        Err(err) => {
+            eprintln!("Erro ao desserializar o arquivo skills.json: {}", err);
+            process::exit(1); // Encerra o programa com um código de status 1;
+        }
+    };
+
+    let hunts_contents = match fs::read_to_string("config/hunts.json") {
+        Ok(contents) => contents,
+        Err(err) => {
+            eprintln!("Erro ao ler o arquivo combat.json: {}", err);
+            process::exit(1); // Encerra o programa com um código de status 1;
+        }
+    };
+    let config_hunts: Vec<Hunt> = match serde_json::from_str(&hunts_contents) {
+        Ok(value) => value,
+        Err(err) => {
+            eprintln!("Erro ao desserializar o arquivo hunts.json: {}", err);
+            process::exit(1); // Encerra o programa com um código de status 1;
+        }
+    };
+
+    let foods_contents = match fs::read_to_string("config/foods.json") {
+        Ok(contents) => contents,
+        Err(err) => {
+            eprintln!("Erro ao ler o arquivo combat.json: {}", err);
+            process::exit(1); // Encerra o programa com um código de status 1;
+        }
+    };
+    let config_foods: Foods = match serde_json::from_str(&foods_contents) {
+        Ok(value) => value,
+        Err(err) => {
+            eprintln!("Erro ao desserializar o arquivo foods.json: {}", err);
+            process::exit(1); // Encerra o programa com um código de status 1;
+        }
+    };
+
+    let walks_contents = match fs::read_to_string("config/walks.json") {
+        Ok(contents) => contents,
+        Err(err) => {
+            eprintln!("Erro ao ler o arquivo combat.json: {}", err);
+            process::exit(1); // Encerra o programa com um código de status 1;
+        }
+    };
+    let config_walks: Vec<Walk> = match serde_json::from_str(&walks_contents) {
+        Ok(value) => value,
+        Err(err) => {
+            eprintln!("Erro ao desserializar o arquivo walks.json: {}", err);
+            process::exit(1); // Encerra o programa com um código de status 1;
+        }
+    };
+
+    let timer_contents = match fs::read_to_string("config/timer.json") {
+        Ok(contents) => contents,
+        Err(err) => {
+            eprintln!("Erro ao ler o arquivo combat.json: {}", err);
+            process::exit(1); // Encerra o programa com um código de status 1;
+        }
+    };
+    let config_timer: Timer = match serde_json::from_str(&timer_contents) {
+        Ok(value) => value,
+        Err(err) => {
+            eprintln!("Erro ao desserializar o arquivo timer.json: {}", err);
+            process::exit(1); // Encerra o programa com um código de status 1;
+        }
+    };
     
     let config_contents = Config {
         hunts: config_hunts,
         combat: config_combat,
         skills: config_skills,
         foods: config_foods,
-        walks: config_walks
+        walks: config_walks,
+        timer: config_timer
     };
 
-
     return config_contents;
-}
-
-pub fn use_foods(food: &Food){
-    let brt = chrono::FixedOffset::west_opt(3 * 3600).unwrap(); // Horário de Brasília (UTC-3)
-    let current_time = Local::now().with_timezone(&brt);
-    info!("Using {} at {:02}:{:02}:{:02} BRT..", food.name, current_time.hour(), current_time.minute(), current_time.second());
-    press_skill(unsafe { WINDOW_HANDLE }, &food.hotkey);
-    thread::sleep(Duration::from_millis(100));
 }
 
 fn main_menu() -> io::Result<()> {
@@ -381,6 +460,9 @@ async fn hunting(config: Config) -> io::Result<()> {
         r.store(false, Ordering::SeqCst);
     }).expect("Erro ao definir o manipulador de Ctrl-C");
 
+    let timer_task = task::spawn(run_timer_general(running.clone(), config.timer));
+    // Aguarde um curto período de tempo antes de iniciar a próxima tarefa
+    sleep(Duration::from_millis(100)).await;
     let status_food_task = task::spawn(run_timer_for_foods(config.foods.status.clone(), running.clone()));
     // Aguarde um curto período de tempo antes de iniciar a próxima tarefa
     sleep(Duration::from_millis(100)).await;
@@ -400,6 +482,7 @@ async fn hunting(config: Config) -> io::Result<()> {
         }
     });
 
+    let _ = timer_task.await?;
     let _ = status_food_task.await?;
     let _ = attack_power_task.await?;
     let _ = hp_mana_regen_food_task.await?;
@@ -420,7 +503,7 @@ async fn only_walk(config: Config) -> io::Result<()> {
         r.store(false, Ordering::SeqCst);
     }).expect("Erro ao definir o manipulador de Ctrl-C");
 
-    let timer_task = task::spawn(run_timer_general(running.clone()));
+    let timer_task = task::spawn(run_timer_general(running.clone(), config.timer));
     let walking_task = task::spawn(async move {
         while running.load(Ordering::SeqCst) {
             for (index, path) in selected_walk.route.iter().enumerate() {
@@ -436,7 +519,7 @@ async fn only_walk(config: Config) -> io::Result<()> {
             }
             break;
         }
-        process::exit(0); // Encerra o programa com um código de status 1
+        process::exit(0); // Encerra o programa com um código de status 0
     });
 
     let _ = timer_task.await?;
@@ -464,7 +547,7 @@ async fn only_combat(config: Config) -> io::Result<()> {
         r.store(false, Ordering::SeqCst);
     }).expect("Erro ao definir o manipulador de Ctrl-C");
 
-    let timer_task = task::spawn(run_timer_general(running.clone()));
+    let timer_task = task::spawn(run_timer_general(running.clone(), config.timer));
     let hunting_task = task::spawn(async move {
         info!("Starting only combat. Manual walk.");
         while running.load(Ordering::SeqCst) {
@@ -477,6 +560,44 @@ async fn only_combat(config: Config) -> io::Result<()> {
 
     Ok(())
 }
+
+// Função para pausar e despausar o processo
+// async fn pause_process(running: Arc<AtomicBool>) -> bool {
+//     const PAUSE_DEBOUNCE_DURATION: u128 = 500; // Em milissegundos
+//     let mut paused = false;
+//     let mut last_toggle_time = Instant::now();
+
+//     loop {
+//         let elapsed = last_toggle_time.elapsed().as_millis();
+
+//         if is_pause_pressed() && elapsed > PAUSE_DEBOUNCE_DURATION {
+//             paused = !paused;
+//             last_toggle_time = Instant::now(); // Reinicia o temporizador
+
+//             if paused {
+//                 info!("Pausing process...");
+//             } else {
+//                 info!("Resuming process...");
+//             }
+
+//             while is_pause_pressed() {
+//                 info!("Waiting for pause key release...");
+//                 sleep(Duration::from_millis(100)).await;
+//             }
+
+//             info!("Process resumed and the value of paused is {}.", paused); // Verifique se a mensagem é exibida quando o processo é retomado.
+
+//         } 
+//         sleep(Duration::from_millis(100)).await; // Aguarde um curto período antes de verificar novamente.
+//     }
+// }
+
+// // Função para verificar se a hotkey de pausa foi pressionada
+// fn is_pause_pressed() -> bool {
+//     unsafe {
+//         (GetAsyncKeyState(VK_PAUSE) as u16 & 0x8000) != 0
+//     }
+// }
 
 fn main() {
     env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
