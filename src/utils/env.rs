@@ -69,7 +69,14 @@ pub struct Config {
     pub walks: Vec<Walk>,
     pub combat: Combat, 
     pub skills: Skills,
-    pub foods: Foods
+    pub foods: Foods,
+    pub timer: Timer
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Timer {
+    pub flag: bool,
+    pub hours: u64
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
