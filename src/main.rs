@@ -9,7 +9,7 @@ use std::time::Duration;
 use ravenbot::commands::only_walk_path_walker;
 use ravenbot::utils::env::{Food, Timer};
 use tokio::time::sleep;
-use winapi::um::winuser::{GetAsyncKeyState, VK_F1};
+use winapi::um::winuser::{GetAsyncKeyState, VK_F1, VK_F12};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use winapi::shared::minwindef::{LPARAM, BOOL, DWORD};
@@ -315,6 +315,8 @@ fn create_hunting_coordinates() -> io::Result<()> {
         },
     };
 
+    info!("Pressione 'F1' para salvar a coordenada da posição atual.");
+    info!("Pressione 'F12' para finalizar o processo.");
     while running.load(Ordering::SeqCst) {
         unsafe {
             if GetAsyncKeyState(VK_F1 as i32) as u16 & 0x8000 != 0 {
@@ -333,6 +335,10 @@ fn create_hunting_coordinates() -> io::Result<()> {
                 fs::write(file_path, json_string.as_bytes()).expect("Falha ao escrever no arquivo");
     
                 thread::sleep(Duration::from_secs(1)); // Evita capturas duplicadas
+            }
+            if GetAsyncKeyState(VK_F12 as i32) as u16 & 0x8000 != 0 {
+                info!("Finalizando...");
+                process::exit(0); // Encerra o programa com um código de status 0
             }
         }
     }

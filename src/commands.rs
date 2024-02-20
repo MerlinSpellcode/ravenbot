@@ -218,11 +218,11 @@ fn defensive_skills(hwnd: HWND, hp_to_defense_light: &str, hp_to_defense_full: &
     }
 }
 
-fn start_fight(hwnd: HWND, combat_basic: &[BasicS], global_cd: u64, combat_start: &[Skill], cooldown_manager: &mut CooldownManager){
+fn start_fight(hwnd: HWND, hp_to_defense_light: &str, hp_to_defense_full: &str, combat_defense_light:&[Skill], combat_defense_full:&[Skill], combat_basic: &[BasicS], global_cd: u64, combat_start: &[Skill], cooldown_manager: &mut CooldownManager){
     info!("Begining 'Start' skills rotation.");
     for skill in combat_start.iter(){
-        // defensive_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_basic, global_cd);
         if check_target(hwnd){
+            defensive_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_basic, global_cd, cooldown_manager);
             cast_skill_prereq(hwnd, skill, global_cd, combat_basic, cooldown_manager);
             cast_skill(hwnd, skill, global_cd, combat_basic, cooldown_manager);
         } else {
@@ -232,11 +232,11 @@ fn start_fight(hwnd: HWND, combat_basic: &[BasicS], global_cd: u64, combat_start
     }
 }
 
-fn combo_skills(hwnd: HWND, combat_combo: &[Skill], combat_basic: &[BasicS], global_cd: u64, cooldown_manager: &mut CooldownManager){
+fn combo_skills(hwnd: HWND, hp_to_defense_light: &str, hp_to_defense_full: &str, combat_defense_light:&[Skill], combat_defense_full:&[Skill], combat_combo: &[Skill], combat_basic: &[BasicS], global_cd: u64, cooldown_manager: &mut CooldownManager){
     info!("Begining 'Combo' skills rotation.");
     for skill in combat_combo.iter(){
         if check_target(hwnd){
-            // defensive_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_basic, global_cd);
+            defensive_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_basic, global_cd, cooldown_manager);
             cast_skill_prereq(hwnd, skill, global_cd, combat_basic, cooldown_manager);
             cast_skill(hwnd, skill, global_cd, combat_basic, cooldown_manager);
         } else {
@@ -333,9 +333,9 @@ pub fn hunting_instance(hwnd: HWND, hp_regen_passive: &str, mana_regen_passive: 
             std::thread::sleep(std::time::Duration::from_millis(2100));
         }
         defensive_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_basic, global_cd, cooldown_manager);
-        start_fight(hwnd, combat_basic, global_cd, combat_start, cooldown_manager);
-        defensive_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_basic, global_cd, cooldown_manager);
-        combo_skills(hwnd, combat_combo, combat_basic, global_cd, cooldown_manager);
+        start_fight(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_basic, global_cd, combat_start, cooldown_manager);
+        // defensive_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_basic, global_cd, cooldown_manager);
+        combo_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_combo, combat_basic, global_cd, cooldown_manager);
     }
     
     if hp_need_passive_restore(hp_regen_passive) {
@@ -350,6 +350,7 @@ pub fn hunting_instance(hwnd: HWND, hp_regen_passive: &str, mana_regen_passive: 
                     if check_target(hwnd) {
                         break;
                     }
+                    info!("Using drink ({}) to regenerate HP.", drink.hotkey);
                     press_skill(hwnd, &drink.hotkey)
                 }
             }
@@ -367,6 +368,7 @@ pub fn hunting_instance(hwnd: HWND, hp_regen_passive: &str, mana_regen_passive: 
                     if check_target(hwnd) {
                         break;
                     }
+                    info!("Using drink ({}) to regenerate Mana.", drink.hotkey);
                     press_skill(hwnd, &drink.hotkey)
                 }
             }
@@ -379,9 +381,9 @@ pub fn only_combat_instance(hwnd: HWND, hp_to_defense_light: &str, hp_to_defense
     while check_target(hwnd) {
         info!("Target found. Starting FIGHT.");
         defensive_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_basic, global_cd, cooldown_manager);
-        start_fight(hwnd, combat_basic, global_cd, combat_start, cooldown_manager);
-        defensive_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_basic, global_cd, cooldown_manager);
-        combo_skills(hwnd, combat_combo, combat_basic, global_cd, cooldown_manager);
+        start_fight(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_basic, global_cd, combat_start, cooldown_manager);
+        // defensive_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_basic, global_cd, cooldown_manager);
+        combo_skills(hwnd, hp_to_defense_light, hp_to_defense_full, combat_defense_light, combat_defense_full, combat_combo, combat_basic, global_cd, cooldown_manager);
     }
     return;
 }

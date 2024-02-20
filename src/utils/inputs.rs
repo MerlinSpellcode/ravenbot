@@ -60,7 +60,12 @@ pub fn double_press_skill(hwnd: HWND, key: &str){
             unsafe { PostMessageA(hwnd, WM_KEYDOWN, *hotkey as usize, 0); }
             thread::sleep(Duration::from_millis(100));
             unsafe { PostMessageA(hwnd, WM_KEYUP, *hotkey as usize, 0); }
+            thread::sleep(Duration::from_millis(200));
+            unsafe { PostMessageA(hwnd, WM_KEYDOWN, *hotkey as usize, 0); }
             thread::sleep(Duration::from_millis(100));
+            unsafe { PostMessageA(hwnd, WM_KEYUP, *hotkey as usize, 0); }
+            thread::sleep(Duration::from_millis(100));
+            
         }
         None => {
             warn!("Hotkey not found for: {}", key);
