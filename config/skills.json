@@ -193,10 +193,10 @@
     },
     {
       "hotkey": "3",
-      "mana": 142,
+      "mana": 178,
       "aether": false,
-      "cooldown": 12,
-      "name": "Regenerate",
+      "cooldown": 8,
+      "name": "Spirits Resolve",
       "is_area": false,
       "prereq": {
         "hotkey": "",
