@@ -81,12 +81,12 @@ pub fn hp_need_passive_restore(hp_to_regen_passive: &str) -> bool {
 }
 
 pub fn mana_need_passive_restore(mana_to_regen_passive: &str) -> bool {
-    let hp_current = get_hp_current(); // ex.: 1500
-    let hp_max = get_hp_max(); // ex.: 2000
+    let mana_current = get_mana_current(); // ex.: 1500
+    let mana_max = get_mana_max(); // ex.: 2000
     let mana_to_regen_passive_percent_value = mana_to_regen_passive.trim_end_matches('%').parse::<f64>()
         .expect("Erro ao converter a porcentagem de mana_to_regen_passive"); // 70.0
-    let hp_threshold = hp_max * (mana_to_regen_passive_percent_value / 100.0); // 2000 * (70.0 / 80) = 1750
-    hp_current < hp_threshold // 1750 < 1750
+    let mana_threshold = mana_max * (mana_to_regen_passive_percent_value / 100.0); // 2000 * (70.0 / 80) = 1750
+    mana_current < mana_threshold // 1750 < 1750
 }
 
 pub fn hp_can_continue(hp_to_continue: &str) -> bool {
