@@ -193,10 +193,10 @@
     },
     {
       "hotkey": "3",
-      "mana": 178,
-      "aether": false,
-      "cooldown": 8,
-      "name": "Spirits Resolve",
+      "mana": 0,
+      "aether": true,
+      "cooldown": 30,
+      "name": "Feastering Strike",
       "is_area": false,
       "prereq": {
         "hotkey": "",
@@ -262,6 +262,24 @@
         "name": "Erupt",
         "is_area": false,
         "has_global": true
+      },
+      "has_global": true
+    },
+    {
+      "hotkey": "3",
+      "mana": 0,
+      "aether": true,
+      "cooldown": 30,
+      "name": "Feastering Strike",
+      "is_area": false,
+      "prereq": {
+        "hotkey": "",
+        "mana": 0,
+        "aether": false,
+        "cooldown": 0,
+        "name": "",
+        "is_area": false,
+        "has_global": false
       },
       "has_global": true
     }

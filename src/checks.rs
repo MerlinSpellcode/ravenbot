@@ -1,5 +1,5 @@
 
-use log::info;
+use log2::*;
 
 use crate::utils::env::{decode_hwid, decode_mempath, MANA_CURRENT, MANA_MAX, HP_CURRENT, HP_MAX, AETHER, TARGET_CHECK, P_X, P_Y, P_Z};
 use crate::utils::address::{get_double_value_from_pointer_chain, get_value_memory};
@@ -52,15 +52,6 @@ pub fn get_hp_actual() {
     let hp_max = get_hp_max();
     info!("HP: {}/{}", hp_current, hp_max);
 }
-
-// pub fn mana_need_restore(value_percent: &str) -> bool {
-//     let mana_current = get_mana_current();
-//     let mana_max = get_mana_max();
-//     let percent_value = value_percent.trim_end_matches('%').parse::<f64>()
-//         .expect("Erro ao converter a porcentagem");
-//     let mana_threshold = mana_max * (percent_value / 100.0);
-//     mana_current < mana_threshold
-// }
 
 pub fn hp_need_combat_restore(hp_to_combat_restore: &str) -> bool {
     let hp_current = get_hp_current(); // ex.: 1500
