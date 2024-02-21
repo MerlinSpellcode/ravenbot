@@ -1,4 +1,4 @@
-use log::warn;
+use log2::*;
 use winapi::um::winuser::{PostMessageA, WM_KEYDOWN, WM_KEYUP};
 use winapi::shared::windef::HWND;
 use std::thread;

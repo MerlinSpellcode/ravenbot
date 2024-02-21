@@ -32,8 +32,8 @@ use ravenbot::checks::check_hwid;
 use tokio::{time::interval, task};
 
 use chrono::{Local, Timelike};
-use log::{info, error};
-use env_logger::Env;
+// use log::{info, error};
+use log2::*;
 
 struct WindowInfo {
     game_p_id: DWORD,
@@ -571,21 +571,46 @@ fn cooldown_manager_construct(skills: &Skills) -> CooldownManager {
     let mut cooldown_manager = CooldownManager::new();
     for skill in skills.start.iter(){
         cooldown_manager.set_cooldown(&skill.hotkey, Duration::from_secs(skill.cooldown));
+        if skill.prereq.hotkey != "" {
+            cooldown_manager.set_cooldown(&skill.prereq.hotkey, Duration::from_secs(skill.prereq.cooldown));
+        }
     }
     for skill in skills.combo.iter(){
         cooldown_manager.set_cooldown(&skill.hotkey, Duration::from_secs(skill.cooldown));
+        if skill.prereq.hotkey != "" {
+            cooldown_manager.set_cooldown(&skill.prereq.hotkey, Duration::from_secs(skill.prereq.cooldown));
+        }
     }
     for skill in skills.defense_full.iter(){
         cooldown_manager.set_cooldown(&skill.hotkey, Duration::from_secs(skill.cooldown));
+        if skill.prereq.hotkey != "" {
+            cooldown_manager.set_cooldown(&skill.prereq.hotkey, Duration::from_secs(skill.prereq.cooldown));
+        }
     }
     for skill in skills.defense_light.iter(){
         cooldown_manager.set_cooldown(&skill.hotkey, Duration::from_secs(skill.cooldown));
+        if skill.prereq.hotkey != "" {
+            cooldown_manager.set_cooldown(&skill.prereq.hotkey, Duration::from_secs(skill.prereq.cooldown));
+        }
     }
     cooldown_manager
 }
 
 fn main() {
-    env_logger::Builder::from_env(Env::default().default_filter_or("info")).init();
+    // configurable way: 
+    // - log to file, file size: 100 MB, rotate: 20
+    // - tee to stdout
+    // - show module path, default is true
+    let _log2 = log2::open("logs/log.txt")
+        .size(100*1024*1024)
+        .rotate(20)
+        .tee(true)
+        .module(true)
+        .start();
+
+    // out-of-the-box way
+    // let _log2 = log2::open("log.txt").start();
+
     if !check_hwid() {
         error!("HWID não corresponde ao proprietário do bot.");
         process::exit(1); // Encerra o programa com um código de status 1

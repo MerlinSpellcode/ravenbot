@@ -1,4 +1,4 @@
-use log::error;
+use log2::*;
 use winapi::um::processthreadsapi::OpenProcess;
 use winapi::um::psapi::{EnumProcessModules, GetModuleInformation, MODULEINFO};
 use winapi::um::winnt::PROCESS_ALL_ACCESS;

@@ -1,4 +1,4 @@
-use log::info;
+use log2::*;
 use winapi::shared::windef::HWND;
 use crate::utils::inputs::{press_w, press_a, press_s, press_d, press_skill, press_tab, double_press_skill};
 use crate::utils::env::{BasicS, Drink, Hunt, Prereq, Skill, CooldownManager};
