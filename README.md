@@ -1,5 +1,7 @@
 # Ravenbot
 
+V1.0 - PUBLIC PROJECT
+
 ## Creating Hunting Coordinates
 
 ## Hunting
